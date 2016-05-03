@@ -1,0 +1,8 @@
+# bogus file types
+*.py[cod]
+
+# packaging
+/build/
+/dist/
+/eggs/
+/trigfind.egg-info/
