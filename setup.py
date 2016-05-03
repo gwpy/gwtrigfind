@@ -31,6 +31,17 @@ cmdclass = versioneer.get_cmdclass()
 packages = find_packages()
 scripts = glob.glob(os.path.join('bin', '*'))
 
+# find glue first XXX can remove when glue is on pypi.python.org
+try:
+    from glue import git_version
+except ImportError as e:
+    e.args = ("trigfind requires the GLUE package, which isn\'t available from "
+              "PyPI. Please visit "
+              "https://www.lsc-group.phys.uwm.edu/daswg/projects/glue.html "
+              "to download and install it manually.",)
+    raise
+
+# run setup
 setup(name='trigfind',
       provides=['trigfind'],
       version=__version__,
@@ -41,8 +52,6 @@ setup(name='trigfind',
       cmdclass=cmdclass,
       packages=packages,
       scripts=scripts,
-      setup_requires=[],
-      install_requires=['glue'],
       requires=['glue'],
       use_2to3=False,
       classifiers=[
