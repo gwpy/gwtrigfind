@@ -105,8 +105,9 @@ def find_dmt_files(channel, start, end, base=None, etg='kw', ext='xml'):
         base = '/gds-%s/dmt/triggers/%s/{0}' % (ifo.lower(), tag)
     # find file name format
     if dmt_omega.match(etg):
-        name += '_OmegaC'
-    filename = '%s-*-*.%s' % (tag, ext)
+        filename = '%s-%s_OmegaC-*-*.%s' % (ifo, name, ext)
+    else:
+        filename = '%s-*-*.%s' % (tag, ext)
     # loop over GPS directories and find files
     return _find_in_gps_dirs(os.path.join(base, filename), start, end, ngps=5)
 
