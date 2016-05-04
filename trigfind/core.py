@@ -117,7 +117,7 @@ def _find_in_gps_dirs(globpath, start, end, ngps=5):
     append = out.append
     while gps5 <= end5:
         for f in glob.iglob(globpath.format(gps5)):
-            ce = CacheEntry.from_T050017(f)
+            ce = CacheEntry.from_T050017(os.path.realpath(f))
             if ce.segment.intersects(span):
                 append(ce)
         gps5 += 1
