@@ -34,6 +34,7 @@ __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
 daily_cbc = re.compile('\Adaily[_-]cbc\Z')
 kleinewelle = re.compile('\A(kw|kleinewelle)\Z', re.I)
 dmt_omega = re.compile('\Admt([_-])?omega\Z', re.I)
+omega = re.compile('\Aomega([_-])?(online)?\Z', re.I)
 channel_delim = re.compile('[:_-]')
 
 
@@ -46,6 +47,8 @@ def find_trigger_urls(channel, etg, start, end, **kwargs):
     # construct search
     if daily_cbc.match(etg):
         finder = find_daily_cbc_files
+    elif omega.match(etg):
+        finder = find_omega_online_files
     elif kleinewelle.match(etg) or dmt_omega.match(etg):
         finder = find_dmt_files
         kwargs['etg'] = etg
@@ -154,3 +157,20 @@ def find_daily_cbc_files(channel, start, end, run='bns_gds',
             pass
         date += oneday
     return out.unique()
+
+
+def find_omega_online_files(channel, start, end, filetag='DOWNSELECT',
+                            ext='txt'):
+    # find base path
+    ifo, name = channel.split(':', 1)
+    if ifo == 'G1':
+        dirtag = '%s_%s' % (ifo, name)
+        base = os.path.join(os.path.sep, 'home', 'omega', 'online',
+                            dirtag, 'segments', '{0}', '*')
+    else:
+        raise NotImplementedError("Unrecognised channel for omega online %r"
+                                  % channel)
+
+    trigform = '%s-OMEGA_TRIGGERS_%s-*-*.%s' % (ifo, filetag, ext)
+
+    return _find_in_gps_dirs(os.path.join(base, trigform), start, end, ngps=5)
