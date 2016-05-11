@@ -20,6 +20,7 @@
 
 import glob
 import os.path
+import sys
 
 from setuptools import (setup, find_packages)
 import versioneer
@@ -31,15 +32,12 @@ cmdclass = versioneer.get_cmdclass()
 packages = find_packages()
 scripts = glob.glob(os.path.join('bin', '*'))
 
-# find glue first XXX can remove when glue is on pypi.python.org
-try:
-    from glue import git_version
-except ImportError as e:
-    e.args = ("trigfind requires the GLUE package, which isn\'t available from "
-              "PyPI. Please visit "
-              "https://www.lsc-group.phys.uwm.edu/daswg/projects/glue.html "
-              "to download and install it manually.",)
-    raise
+# declare dependencies
+setup_requires = ['setuptools', 'pytest-runner']
+requires = ['glue']
+tests_require = ['pytest']
+if sys.version_info < (2, 7):
+    tests_require.append('unittest2')
 
 # run setup
 setup(name='trigfind',
@@ -52,7 +50,13 @@ setup(name='trigfind',
       cmdclass=cmdclass,
       packages=packages,
       scripts=scripts,
-      requires=['glue'],
+      setup_requires=setup_requires,
+      requires=requires,
+      tests_require=tests_require,
+      dependency_links=[
+          'http://software.ligo.org/lscsoft/source/glue-1.49.1.tar.gz'
+          '#egg=glue-1.49.1',
+      ],
       use_2to3=False,
       classifiers=[
           'Programming Language :: Python',

@@ -1,0 +1,37 @@
+language: python
+
+addons:
+  apt:
+    packages:
+      - swig  # m2crypto
+
+matrix:
+  include:
+    - python: 2.6
+    - python: 2.7
+    - python: 3.5
+    - python: nightly
+      env: PRE="--pre"
+  allow_failures:
+    - python: 3.5
+    - python: nightly
+      env: PRE="--pre"
+
+before_install:
+  - pip install -q --upgrade ${PRE} pip
+  - pip install -q --upgrade ${PRE} coveralls "pytest>=2.8" unittest2
+
+install:
+  - pip install ${PRE} -r requirements.txt
+  - pip install .
+
+script:
+  - coverage run --source=trigfind --omit="trigfind/tests/*,trigfind/_version.py" ./setup.py test
+  - coverage run --append --source=trigfind --omit="trigfind/tests/*,trigfind/_version.py" `which trigfind` --help
+
+after_success:
+  - coveralls
+
+cache:
+  - pip
+  - apt

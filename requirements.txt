@@ -1,1 +1,4 @@
+pykerberos
+m2crypto
+python-cjson
 http://software.ligo.org/lscsoft/source/glue-1.49.1.tar.gz
