@@ -37,6 +37,8 @@ dmt_omega = re.compile('\Admt([_-])?omega\Z', re.I)
 omega = re.compile('\Aomega([_-])?(online)?\Z', re.I)
 channel_delim = re.compile('[:_-]')
 
+OMICRON_O2_EPOCH = 1146873617
+
 
 def find_trigger_urls(channel, etg, start, end, **kwargs):
     """Find the paths of trigger files for this channel and ETG
@@ -61,24 +63,31 @@ def find_trigger_urls(channel, etg, start, end, **kwargs):
 def find_detchar_files(channel, start, end, etg='omicron', ext='xml.gz'):
     """Find files in the detchar home directory followind T1300468
     """
-    # find base path
     ifo, name = format_channel_name(channel).split('-', 1)
-    tag = etg.title()
-    dirtag = '%s_%s' % (str(channel).split(':', 1)[1], tag)
+    # find base path relative to O1 or O2 formatting
+    if start >= OMICRON_O2_EPOCH:
+        base = os.path.join(os.path.sep, 'home', 'detchar', 'triggers')
+        tag = etg.upper()
+        dirtag = '%s_%s' % (name, tag)
+    else:
+        epoch = '*'
+        base = os.path.join(os.path.sep, 'home', 'detchar', 'triggers', '*')
+        tag = etg.title()
+        dirtag = '%s_%s' % (str(channel).split(':', 1)[1], tag)
+
+    # format file path
     filetag = '%s_%s' % (name, tag)
-    epoch = '*'
-    searchbase = os.path.join(os.path.sep, 'home', 'detchar', 'triggers',
-                              epoch, ifo, dirtag)
     trigform = '%s-%s-%s-*.%s' % (ifo, filetag, '[0-9]'*10, ext)
 
     # test for channel-level directory
-    if not glob.glob(searchbase):
+    channelbase = os.path.join(base, ifo, dirtag)
+    if not glob.glob(channelbase):
         raise ValueError("No channel-level directory found at %s. Either the "
                          "channel name or ETG names are wrong, or this "
                          "channel is not configured for this ETG."
-                         % searchbase)
+                         % channelbase)
 
-    return _find_in_gps_dirs(os.path.join(searchbase, '{0}', trigform),
+    return _find_in_gps_dirs(os.path.join(channelbase, '{0}', trigform),
                              start, end, ngps=5)
 
 
