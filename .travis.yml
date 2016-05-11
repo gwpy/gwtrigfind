@@ -23,12 +23,11 @@ before_install:
 
 install:
   - pip install ${PRE} -r requirements.txt
-  - python setup.py build
+  - pip install .
 
 script:
   - coverage run --source=trigfind --omit="trigfind/tests/*,trigfind/_version.py" ./setup.py test
   - coverage run --append --source=trigfind --omit="trigfind/tests/*,trigfind/_version.py" `which trigfind` --help
-  - pip install .
 
 after_success:
   - coveralls
