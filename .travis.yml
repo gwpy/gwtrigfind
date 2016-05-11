@@ -1,0 +1,41 @@
+language: python
+
+addons:
+  apt:
+    packages:
+      - gcc  # numpy/scipy
+      - gfortran  # numpy/scipy
+      - libblas-dev  # numpy/scipy
+      - liblapack-dev  # numpy/scipy
+      - swig  # m2crypto
+
+matrix:
+  include:
+    - python: 2.6
+    - python: 2.7
+    - python: 3.5
+    - python: latest
+      env: PRE="--pre"
+  allow_failures:
+    - python: 3.5
+    - python: latest
+
+before_install:
+  - pip install -q --upgrade ${PRE} pip
+  - pip install -q --upgrade ${PRE} coveralls "pytest>=2.8" unittest2
+
+install:
+  - pip install ${PRE} -r requirements.txt
+  - python setup.py build
+
+script:
+  - coverage run --source=trigfind --omit="trigfind/tests/*,trigfind/_version.py" ./setup.py test
+  - coverage run --append --source=trigfind --omit="trigfind/tests/*,trigfind/_version.py" `which trigfind` --help
+  - pip install .
+
+after_success:
+  - coveralls
+
+cache:
+  - pip
+  - apt
