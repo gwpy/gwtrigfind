@@ -97,7 +97,7 @@ if trigfind.daily_cbc.match(args.etg):
 
 cache = Cache()
 for seg in segs:
-    cache.extend(trigfind.find_trigger_urls(
+    cache.extend(trigfind.find_trigger_files(
         args.channel, args.etg, start, end, **kwargs))
 
 # find gaps
