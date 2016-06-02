@@ -19,7 +19,7 @@ matrix:
 
 before_install:
   - pip install -q --upgrade ${PRE} pip
-  - pip install -q --upgrade ${PRE} coveralls "pytest>=2.8" unittest2
+  - pip install -q --upgrade ${PRE} coveralls "pytest>=2.8" unittest2 mock
 
 install:
   - pip install ${PRE} -r requirements.txt
