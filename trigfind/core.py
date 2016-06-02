@@ -25,6 +25,7 @@ import glob
 import os.path
 import re
 import datetime
+import warnings
 
 from glue.lal import (Cache, CacheEntry)
 from glue.segments import segment as Segment
@@ -40,7 +41,7 @@ channel_delim = re.compile('[:_-]')
 OMICRON_O2_EPOCH = 1146873617
 
 
-def find_trigger_urls(channel, etg, start, end, **kwargs):
+def find_trigger_files(channel, etg, start, end, **kwargs):
     """Find the paths of trigger files for this channel and ETG
 
     This method uses an ETG-specific finder function to retrieve the
@@ -77,8 +78,8 @@ def find_trigger_urls(channel, etg, start, end, **kwargs):
 
     Examples
     --------
-    >>> from trigfind import find_trigger_urls
-    >>> cache = find_trigger_urls('L1:GDS-CALIB_STRAIN', 'Omicron', 1135641617, 1135728017)
+    >>> from trigfind import find_trigger_files
+    >>> cache = find_trigger_files('L1:GDS-CALIB_STRAIN', 'Omicron', 1135641617, 1135728017)
     """
     start = int(start)
     end = int(end)
@@ -95,6 +96,14 @@ def find_trigger_urls(channel, etg, start, end, **kwargs):
         finder = find_detchar_files
         kwargs['etg'] = etg
     return finder(channel, start, end, **kwargs)
+
+
+def find_trigger_urls(*args, **kwargs):
+    warnings.warn("this method was renamed find_trigger_files",
+                  DeprecationWarning)
+    return find_trigger_files(*args, **kwargs)
+
+find_trigger_urls.__doc__ = find_trigger_files.__doc__
 
 
 def find_detchar_files(channel, start, end, etg='omicron', ext='xml.gz'):
