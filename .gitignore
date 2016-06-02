@@ -8,3 +8,7 @@
 /.eggs/
 /trigfind.egg-info/
 /.cache
+
+# docs
+/docs/_build
+/docs/api
