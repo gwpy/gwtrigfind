@@ -38,7 +38,7 @@ For a full listing of all arguments and options, run:
 
    $ trigfind --help
 
-`~trigfind.find_trigger_urls`
+`~trigfind.find_trigger_files`
 -----------------------------
 
 The ``trigfind`` module provides a convience function to find files for any Event Trigger Generator:
@@ -46,12 +46,12 @@ The ``trigfind`` module provides a convience function to find files for any Even
 .. autosummary::
    :toctree: api/
 
-   trigfind.find_trigger_urls
+   trigfind.find_trigger_files
 
 ::
 
-   >>> from trigfind import find_trigger_urls
-   >>> files = find_trigger_urls('L1:GDS-CALIB_STRAIN', 'omicron', 1135641617, 1135728017)
+   >>> from trigfind import find_trigger_files
+   >>> files = find_trigger_files('L1:GDS-CALIB_STRAIN', 'omicron', 1135641617, 1135728017)
 
 The above method passes information along to one of the following that actually finds the files for a given Event Trigger Generator:
 
