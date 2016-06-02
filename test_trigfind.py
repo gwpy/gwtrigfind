@@ -154,9 +154,12 @@ class TrigfindTestCase(unittest.TestCase):
 
     def test_find_daily_cbc_files(self):
         # can't do much without faking the entire thing
-        cache = trigfind.find_daily_cbc_files('L1:GDS-CALIB_STRAIN',
-                                              0, 100)
-        self.assertIsInstance(cache, Cache)
+        try:
+            cache = trigfind.find_daily_cbc_files('L1:GDS-CALIB_STRAIN', 0, 100)
+        except ImportError as e:
+            self.skipTest(str(e))
+        else:
+            self.assertIsInstance(cache, Cache)
 
     def test_find_omega_online_files(self):
         finder = mock_finder('G1-OMEGA_TRIGGERS_DOWNSELECT-{0}-{1}.txt')
