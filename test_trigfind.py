@@ -19,15 +19,56 @@
 """Tests for trigfind
 """
 
+import os.path
 import sys
 if sys.version_info < (2, 7):
     import unittest2 as unittest
 else:
     import unittest
 
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+
+import pytest
+
+from glue.lal import (Cache, CacheEntry)
+from glue.segments import segment as Segment
+
+import trigfind
 from trigfind import core
 
 __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
+
+
+def mock_finder(fileformat):
+    def mock_find_in_gps_dirs(globpath, start, end, ngps=5):
+        """Fake version of _find_in_gps_dirs for testing
+        """
+        span = Segment(start, end)
+        form = '%%.%ss' % ngps
+        gps5 = int(form % start)
+        end5 = int(form % end)
+        d = int(10 ** ngps // 10)
+        out = Cache()
+        append = out.append
+        t = gps5 * 10 ** ngps
+        gpsdir = os.path.split(globpath)[0]
+        while gps5 <= end5:
+            tdir = gpsdir.format(gps5)
+            while t < (gps5 + 1) * 10 ** ngps:
+                f = os.path.join(tdir, fileformat.format(t, d))
+                ce = CacheEntry.from_T050017(os.path.abspath(f))
+                if ce.segment.intersects(span):
+                    append(ce)
+                if t >= end:
+                    break
+                t += d
+            gps5 += 1
+        out.sort(key=lambda e: e.path)
+        return out.unique()
+    return mock_find_in_gps_dirs
 
 
 class TrigfindTestCase(unittest.TestCase):
@@ -44,3 +85,97 @@ class TrigfindTestCase(unittest.TestCase):
     def test_format_channel_name(self):
         self.assertEqual(core._format_channel_name('X1:TEST-CHANNEL_NAME'),
                          'X1-TEST_CHANNEL_NAME')
+
+    def test_find_dmt_files(self):
+        # check error for unknown ETG
+        self.assertRaises(NotImplementedError, trigfind.find_dmt_files,
+                          None, 0, 100, etg='fake-etg')
+
+    def test_find_dmt_files_dmt_omega(self):
+        finder = mock_finder('L1-GDS_CALIB_STRAIN_OmegaC-{0}-{1}.xml')
+        with mock.patch('trigfind.core._find_in_gps_dirs', finder):
+            cache = trigfind.find_dmt_files(
+                'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017, etg='dmt-omega')
+            self.assertIsInstance(cache, Cache)
+            self.assertEqual(len(cache), 9)
+            self.assertEqual(cache[0].path,
+                             '/gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
+                             'L1-GDS_CALIB_STRAIN_OmegaC-1135640000-10000.xml')
+        # check error for non-hoft channel with DMT-Omega
+        self.assertRaises(NotImplementedError, trigfind.find_dmt_files,
+                          'X1:TEST', 0, 100, etg='dmt-omega')
+
+    def test_find_dmt_files_kleinewelle(self):
+        finder = mock_finder('L-KW_TRIGGERS-{0}-{1}.xml')
+        with mock.patch('trigfind.core._find_in_gps_dirs', finder):
+            cache = trigfind.find_dmt_files('L1:TEST-CHANNEL', 1135641617,
+                                            1135728017, etg='kleinewelle')
+            self.assertIsInstance(cache, Cache)
+            self.assertEqual(len(cache), 9)
+            self.assertEqual(cache[0].path,
+                             '/gds-l1/dmt/triggers/L-KW_TRIGGERS/'
+                             'L-KW_TRIGGERS-11356/'
+                             'L-KW_TRIGGERS-1135640000-10000.xml')
+        # test h(t)
+        finder = mock_finder('L-KW_HOFT-{0}-{1}.xml')
+        with mock.patch('trigfind.core._find_in_gps_dirs', finder):
+            cache = trigfind.find_dmt_files('L1:GDS-CALIB_STRAIN', 1135641617,
+                                            1135728017, etg='kleinewelle')
+            self.assertIsInstance(cache, Cache)
+            self.assertEqual(len(cache), 9)
+            self.assertEqual(cache[0].path,
+                             '/gds-l1/dmt/triggers/L-KW_HOFT/'
+                             'L-KW_HOFT-11356/L-KW_HOFT-1135640000-10000.xml')
+
+    def test_find_detchar_files(self):
+        finder = mock_finder('L1-GDS_CALIB_STRAIN_OMICRON-{0}-{1}.xml')
+        mock_glob = lambda x: True
+        with mock.patch('trigfind.core._find_in_gps_dirs', finder):
+            with mock.patch('glob.glob', mock_glob):
+                cache = trigfind.find_detchar_files(
+                    'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017,
+                    etg='omicron')
+                self.assertIsInstance(cache, Cache)
+                self.assertEqual(len(cache), 9)
+                self.assertEqual(
+                    cache[0].path,
+                    '/home/detchar/triggers/*/L1/GDS-CALIB_STRAIN_Omicron/'
+                    '11356/L1-GDS_CALIB_STRAIN_OMICRON-1135640000-10000.xml')
+                cache = trigfind.find_detchar_files(
+                    'L1:GDS-CALIB_STRAIN', 1146873617, 1146873617+1,
+                    etg='omicron')
+                self.assertEqual(
+                    cache[0].path,
+                    '/home/detchar/triggers/L1/GDS_CALIB_STRAIN_OMICRON/11468/'
+                    'L1-GDS_CALIB_STRAIN_OMICRON-1146870000-10000.xml')
+        # test error for channel that has never been processed
+        self.assertRaises(ValueError, trigfind.find_detchar_files,
+                          'X1:DOES-NOT_EXIST:1', 0, 100, etg='fake-etg')
+
+    def test_find_daily_cbc_files(self):
+        # can't do much without faking the entire thing
+        cache = trigfind.find_daily_cbc_files('L1:GDS-CALIB_STRAIN',
+                                              0, 100)
+        self.assertIsInstance(cache, Cache)
+
+    def test_find_omega_online_files(self):
+        finder = mock_finder('G1-OMEGA_TRIGGERS_DOWNSELECT-{0}-{1}.txt')
+        with mock.patch('trigfind.core._find_in_gps_dirs', finder):
+            cache = trigfind.find_omega_online_files(
+                'G1:DER_DATA_H', 1135641617, 1135728017)
+            self.assertIsInstance(cache, Cache)
+            self.assertEqual(len(cache), 9)
+            self.assertEqual(
+                cache[0].path,
+                '/home/omega/online/G1_DER_DATA_H/segments/11356/*/'
+                'G1-OMEGA_TRIGGERS_DOWNSELECT-1135640000-10000.txt')
+        self.assertRaises(NotImplementedError,
+                          trigfind.find_omega_online_files, 'L1:TEST-CHANNEL',
+                          0, 100)
+
+    def test_find_trigger_urls(self):
+        # make sure a DeprecationWarning is presented
+        with pytest.warns(DeprecationWarning):
+            # simplest test is to throw an error from find_detchar_files
+            self.assertRaises(ValueError, trigfind.find_trigger_urls,
+                              'X1:DOES-NOT_EXIST:1', 'fake-etg', 0, 100)
