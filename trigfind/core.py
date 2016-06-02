@@ -190,6 +190,10 @@ def find_dmt_files(channel, start, end, base=None, etg='kw', ext='xml'):
     files : :class:`~glue.lal.Cache`
         a structured list of file URLS
     """
+    # validate ETG is sensible
+    if not kleinewelle.match(etg) and not dmt_omega.match(etg):
+        raise NotImplementedError("Unrecognised ETG %r for DMT files")
+
     span = Segment(int(start), int(end))
     ifo, name = _format_channel_name(str(channel)).split('-', 1)
     hoft = name == 'GDS_CALIB_STRAIN'
