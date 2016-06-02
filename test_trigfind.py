@@ -25,7 +25,7 @@ if sys.version_info < (2, 7):
 else:
     import unittest
 
-import trigfind
+from trigfind import core
 
 __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
 
@@ -33,14 +33,14 @@ __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
 class TrigfindTestCase(unittest.TestCase):
     def test_regex(self):
         for var in ['daily-cbc', 'daily_cbc']:
-            self.assertRegexpMatches(var, trigfind.daily_cbc)
+            self.assertRegexpMatches(var, core.daily_cbc)
         for var in ['kw', 'kleinewelle', 'KleineWelle']:
-            self.assertRegexpMatches(var, trigfind.kleinewelle)
+            self.assertRegexpMatches(var, core.kleinewelle)
         for var in ['dmtomega', 'dmt-omega', 'dmt_omega', 'DMT Omega']:
-            self.assertRegexpMatches(var, trigfind.dmt_omega)
+            self.assertRegexpMatches(var, core.dmt_omega)
         for var in ['omega', 'omega_online']:
-            self.assertRegexpMatches(var, trigfind.omega)
+            self.assertRegexpMatches(var, core.omega)
 
     def test_format_channel_name(self):
-        self.assertEqual(trigfind.format_channel_name('X1:TEST-CHANNEL_NAME'),
+        self.assertEqual(core._format_channel_name('X1:TEST-CHANNEL_NAME'),
                          'X1-TEST_CHANNEL_NAME')
