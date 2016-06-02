@@ -42,6 +42,43 @@ OMICRON_O2_EPOCH = 1146873617
 
 def find_trigger_urls(channel, etg, start, end, **kwargs):
     """Find the paths of trigger files for this channel and ETG
+
+    This method uses an ETG-specific finder function to retrieve the
+    file paths
+
+    Parameters
+    ----------
+    channel : `str`
+        name of data channel for which to search
+
+    etg : `str`
+        name of trigger generator that processed the data
+
+    start : `int`
+        GPS start time of search
+
+    end : `int`
+        GPS end time of search
+
+    **kwargs
+        custom keyword arguments to pass down to the underlying finder
+
+    Returns
+    -------
+    files : :class:`~glue.lal.Cache`
+        a structured list of file URLS
+
+    See Also
+    --------
+    trigfind.find_detchar_files
+    trigfind.find_daily_cbc_files
+    trigfind.find_dmt_files
+    trigfind.find_omega_online_files
+
+    Examples
+    --------
+    >>> from trigfind import find_trigger_urls
+    >>> cache = find_trigger_urls('L1:GDS-CALIB_STRAIN', 'Omicron', 1135641617, 1135728017)
     """
     start = int(start)
     end = int(end)
@@ -62,8 +99,31 @@ def find_trigger_urls(channel, etg, start, end, **kwargs):
 
 def find_detchar_files(channel, start, end, etg='omicron', ext='xml.gz'):
     """Find files in the detchar home directory followind T1300468
+
+    Parameters
+    ----------
+    channel : `str`
+        name of data channel for which to search
+
+    start : `int`
+        GPS start time of search
+
+    end : `int`
+        GPS end time of search
+
+    etg : `str`, optional
+        name of trigger generator that processed the data, defaults to
+        ``'omicron'``
+
+    ext : `str`, optional
+        file extension, defaults to ``'xml.gz'``
+
+    Returns
+    -------
+    files : :class:`~glue.lal.Cache`
+        a structured list of file URLS
     """
-    ifo, name = format_channel_name(channel).split('-', 1)
+    ifo, name = _format_channel_name(channel).split('-', 1)
     # find base path relative to O1 or O2 formatting
     if start >= OMICRON_O2_EPOCH:
         base = os.path.join(os.path.sep, 'home', 'detchar', 'triggers')
@@ -93,9 +153,36 @@ def find_detchar_files(channel, start, end, etg='omicron', ext='xml.gz'):
 
 def find_dmt_files(channel, start, end, base=None, etg='kw', ext='xml'):
     """Find DMT-Omega trigger XML files
+
+    Parameters
+    ----------
+    channel : `str`
+        name of data channel for which to search
+
+    start : `int`
+        GPS start time of search
+
+    end : `int`
+        GPS end time of search
+
+    base : `str, optional
+        path of custom base directory, defaults to the LDG standard for
+        the given ``etg``
+
+    etg : `str`, optional
+        name of trigger generator that processed the data, defaults to
+        ``'kw'``
+
+    ext : `str`, optional
+        file extension, defaults to ``'xml'``
+
+    Returns
+    -------
+    files : :class:`~glue.lal.Cache`
+        a structured list of file URLS
     """
     span = Segment(int(start), int(end))
-    ifo, name = format_channel_name(str(channel)).split('-', 1)
+    ifo, name = _format_channel_name(str(channel)).split('-', 1)
     hoft = name == 'GDS_CALIB_STRAIN'
     # find base path
     site = ifo[0].upper()
@@ -138,13 +225,40 @@ def _find_in_gps_dirs(globpath, start, end, ngps=5):
     return out.unique()
 
 
-def format_channel_name(channel):
+def _format_channel_name(channel):
     return channel_delim.sub('_', channel).replace('_', '-', 1)
 
 
 def find_daily_cbc_files(channel, start, end, run='bns_gds',
                          filetag='30MILLISEC_CLUSTERED', ext='xml.gz'):
     """Find daily CBC analysis trigger files
+
+    Parameters
+    ----------
+    channel : `str`
+        name of data channel for which to search
+
+    start : `int`
+        GPS start time of search
+
+    end : `int`
+        GPS end time of search
+
+    run : `str`, optional
+        name of daily CBC analysis that generated the files, defaults to
+        ``'bns_gds'``
+
+    filetag : `str`, optional
+        tag describing which kind of clustering was applied, defaults to
+        ``'30MILLISEC_CLUSTERED'``
+
+    ext : `str`, optional
+        file extension, defaults to ``'xml.gz'``
+
+    Returns
+    -------
+    files : :class:`~glue.lal.Cache`
+        a structured list of file URLS
     """
     from lal import gpstime
     span = Segment(start, end)
@@ -171,6 +285,34 @@ def find_daily_cbc_files(channel, start, end, run='bns_gds',
 
 def find_omega_online_files(channel, start, end, filetag='DOWNSELECT',
                             ext='txt'):
+    """Find Omega triggers produced by online processes
+
+    This is only tested to work for the Omega online processing for GEO600
+
+    Parameters
+    ----------
+    channel : `str`
+        name of data channel for which to search
+
+    start : `int`
+        GPS start time of search
+
+    end : `int`
+        GPS end time of search
+
+    filetag : `str`, optional
+        tag describing which king of Omega files you want, defaults to
+        ``'DOWNSELECT'``
+
+    ext : `str`, optional
+        file extension, defaults to ``'txt'``
+
+    Returns
+    -------
+    files : :class:`~glue.lal.Cache`
+        a structured list of file URLS
+    """
+
     # find base path
     ifo, name = channel.split(':', 1)
     if ifo == 'G1':
