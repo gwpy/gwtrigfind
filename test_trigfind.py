@@ -20,6 +20,7 @@
 """
 
 import os.path
+import glob
 import sys
 if sys.version_info < (2, 7):
     import unittest2 as unittest
@@ -42,34 +43,46 @@ from trigfind import core
 __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
 
 
-def mock_finder(fileformat):
-    def mock_find_in_gps_dirs(globpath, start, end, ngps=5):
-        """Fake version of _find_in_gps_dirs for testing
-        """
-        span = Segment(start, end)
-        form = '%%.%ss' % ngps
-        gps5 = int(form % start)
-        end5 = int(form % end)
-        d = int(10 ** ngps // 10)
-        out = Cache()
-        append = out.append
-        t = gps5 * 10 ** ngps
-        gpsdir = os.path.split(globpath)[0]
-        while gps5 <= end5:
-            tdir = gpsdir.format(gps5)
-            while t < (gps5 + 1) * 10 ** ngps:
-                f = os.path.join(tdir, fileformat.format(t, d))
-                ce = CacheEntry.from_T050017(os.path.abspath(f))
-                if ce.segment.intersects(span):
-                    append(ce)
-                if t >= end:
-                    break
-                t += d
-            gps5 += 1
-        out.sort(key=lambda e: e.path)
-        return out.unique()
-    return mock_find_in_gps_dirs
+# -- mock methods -------------------------------------------------------------
 
+def realpath(f):
+    return f
+
+os.path.realpath = realpath  # mock realpath for testing
+
+
+def mock_iglob_factory(fileformat):
+    def mock_gps_glob(globstr):
+        parent = os.path.split(globstr)[0]
+        while True:
+            globstr = os.path.split(globstr)[0]
+            try:
+                gps5 = int(os.path.basename(globstr).rsplit('-')[-1])
+            except ValueError:
+                pass
+            else:
+                break
+        ngps = len(str(gps5))
+        gpsstart = gps5 * 10**ngps
+        gpsend = (gps5 + 1) * 10**ngps
+        d = int(10 ** ngps // 10)
+        t = gpsstart
+        while t < gpsend:
+            f = os.path.join(parent, fileformat.format(t, d))
+            print(f)
+            t += d
+            yield f
+    return mock_gps_glob
+
+
+def mock_find_detchar_glob(globstr):
+    if globstr.lower().endswith('_omicron'):
+        return True
+    else:
+        return list(glob.iglob(globstr))
+
+
+# -- tests --------------------------------------------------------------------
 
 class TrigfindTestCase(unittest.TestCase):
     def test_regex(self):
@@ -86,14 +99,26 @@ class TrigfindTestCase(unittest.TestCase):
         self.assertEqual(core._format_channel_name('X1:TEST-CHANNEL_NAME'),
                          'X1-TEST_CHANNEL_NAME')
 
+    def test_find_trigger_files(self):
+        # quick check that this resolves the ETG correctly
+        iglob = mock_iglob_factory('L1-GDS_CALIB_STRAIN_OmegaC-{0}-{1}.xml')
+        with mock.patch('glob.iglob', iglob):
+            cache = trigfind.find_trigger_files(
+                'L1:GDS-CALIB_STRAIN', 'dmt-omega', 1135641617, 1135728017)
+            self.assertIsInstance(cache, Cache)
+            self.assertEqual(len(cache), 9)
+            self.assertEqual(cache[0].path,
+                             '/gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
+                             'L1-GDS_CALIB_STRAIN_OmegaC-1135640000-10000.xml')
+
     def test_find_dmt_files(self):
         # check error for unknown ETG
         self.assertRaises(NotImplementedError, trigfind.find_dmt_files,
                           None, 0, 100, etg='fake-etg')
 
     def test_find_dmt_files_dmt_omega(self):
-        finder = mock_finder('L1-GDS_CALIB_STRAIN_OmegaC-{0}-{1}.xml')
-        with mock.patch('trigfind.core._find_in_gps_dirs', finder):
+        iglob = mock_iglob_factory('L1-GDS_CALIB_STRAIN_OmegaC-{0}-{1}.xml')
+        with mock.patch('glob.iglob', iglob):
             cache = trigfind.find_dmt_files(
                 'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017, etg='dmt-omega')
             self.assertIsInstance(cache, Cache)
@@ -106,8 +131,8 @@ class TrigfindTestCase(unittest.TestCase):
                           'X1:TEST', 0, 100, etg='dmt-omega')
 
     def test_find_dmt_files_kleinewelle(self):
-        finder = mock_finder('L-KW_TRIGGERS-{0}-{1}.xml')
-        with mock.patch('trigfind.core._find_in_gps_dirs', finder):
+        iglob = mock_iglob_factory('L-KW_TRIGGERS-{0}-{1}.xml')
+        with mock.patch('glob.iglob', iglob):
             cache = trigfind.find_dmt_files('L1:TEST-CHANNEL', 1135641617,
                                             1135728017, etg='kleinewelle')
             self.assertIsInstance(cache, Cache)
@@ -117,8 +142,8 @@ class TrigfindTestCase(unittest.TestCase):
                              'L-KW_TRIGGERS-11356/'
                              'L-KW_TRIGGERS-1135640000-10000.xml')
         # test h(t)
-        finder = mock_finder('L-KW_HOFT-{0}-{1}.xml')
-        with mock.patch('trigfind.core._find_in_gps_dirs', finder):
+        iglob = mock_iglob_factory('L-KW_HOFT-{0}-{1}.xml')
+        with mock.patch('glob.iglob', iglob):
             cache = trigfind.find_dmt_files('L1:GDS-CALIB_STRAIN', 1135641617,
                                             1135728017, etg='kleinewelle')
             self.assertIsInstance(cache, Cache)
@@ -128,10 +153,10 @@ class TrigfindTestCase(unittest.TestCase):
                              'L-KW_HOFT-11356/L-KW_HOFT-1135640000-10000.xml')
 
     def test_find_detchar_files(self):
-        finder = mock_finder('L1-GDS_CALIB_STRAIN_OMICRON-{0}-{1}.xml')
-        mock_glob = lambda x: True
-        with mock.patch('trigfind.core._find_in_gps_dirs', finder):
-            with mock.patch('glob.glob', mock_glob):
+        iglob = mock_iglob_factory('L1-GDS_CALIB_STRAIN_OMICRON-{0}-{1}.xml')
+        glob_ = mock_find_detchar_glob
+        with mock.patch('glob.iglob', iglob):
+            with mock.patch('glob.glob', glob_):
                 cache = trigfind.find_detchar_files(
                     'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017,
                     etg='omicron')
@@ -162,8 +187,8 @@ class TrigfindTestCase(unittest.TestCase):
             self.assertIsInstance(cache, Cache)
 
     def test_find_omega_online_files(self):
-        finder = mock_finder('G1-OMEGA_TRIGGERS_DOWNSELECT-{0}-{1}.txt')
-        with mock.patch('trigfind.core._find_in_gps_dirs', finder):
+        iglob = mock_iglob_factory('G1-OMEGA_TRIGGERS_DOWNSELECT-{0}-{1}.txt')
+        with mock.patch('glob.iglob', iglob):
             cache = trigfind.find_omega_online_files(
                 'G1:DER_DATA_H', 1135641617, 1135728017)
             self.assertIsInstance(cache, Cache)
