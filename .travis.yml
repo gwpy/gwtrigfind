@@ -19,15 +19,15 @@ matrix:
 
 before_install:
   - pip install -q --upgrade ${PRE} pip
-  - pip install -q --upgrade ${PRE} coveralls "pytest>=2.8" unittest2
+  - pip install -q --upgrade ${PRE} coveralls "pytest>=2.8" unittest2 mock
 
 install:
   - pip install ${PRE} -r requirements.txt
   - pip install .
 
 script:
-  - coverage run --source=trigfind --omit="trigfind/tests/*,trigfind/_version.py" ./setup.py test
-  - coverage run --append --source=trigfind --omit="trigfind/tests/*,trigfind/_version.py" `which trigfind` --help
+  - coverage run --source=trigfind --omit="trigfind/_version.py" ./setup.py test
+  - coverage run --append --source=trigfind --omit="trigfind/_version.py" `which trigfind` --help
 
 after_success:
   - coveralls
