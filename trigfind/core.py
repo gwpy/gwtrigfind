@@ -33,6 +33,7 @@ from glue.segments import segment as Segment
 __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
 
 daily_cbc = re.compile('\Adaily[\s_-]cbc\Z')
+pycbc_live = re.compile('\Apycbc[\s_-]live\Z')
 kleinewelle = re.compile('\A(kw|kleinewelle)\Z', re.I)
 dmt_omega = re.compile('\Admt([\s_-])?omega\Z', re.I)
 omega = re.compile('\Aomega([\s_-])?(online)?\Z', re.I)
@@ -87,6 +88,8 @@ def find_trigger_files(channel, etg, start, end, **kwargs):
     # construct search
     if daily_cbc.match(etg):
         finder = find_daily_cbc_files
+    elif pycbc_live.match(etg):
+        finder = find_pycbc_live_files
     elif omega.match(etg):
         finder = find_omega_online_files
     elif kleinewelle.match(etg) or dmt_omega.match(etg):
@@ -241,6 +244,64 @@ def _find_in_gps_dirs(globpath, start, end, ngps=5):
 def _format_channel_name(channel):
     return channel_delim.sub('_', channel).replace('_', '-', 1)
 
+
+def find_pycbc_live_files(channel, start, end, run='official'):
+    """ Find CBC pycbc live trigger files
+
+    Parameters
+    ----------
+    channel : `str`
+        name of data channel for which to search
+
+    start : `int`
+        GPS start time of search
+
+    end : `int`
+        GPS end time of search
+
+    run : `str`, optional
+        name of daily CBC analysis that generated the files, defaults to
+        ``'official'``
+
+    ext : `str`, optional
+        file extension, defaults to ``'xml.gz'``
+
+    Returns
+    -------
+    files : :class:`~glue.lal.Cache`
+        a structured list of file URLS
+    """
+    from lal import gpstime
+
+    #FIXME This will need to be updated when the triggers are moved to a
+    # dedicated account and will then allow for alternate run directories
+    base = os.path.join(os.path.sep, 'home', 'ahnitz', 'pycbc_live', 'data')
+
+    date = gpstime.gps_to_utc(start).date()
+    date_end = gpstime.gps_to_utc(end).date()
+    oneday = datetime.timedelta(days=1)
+
+    cache = Cache()
+    while date <= date_end:
+        date_fol = date.strftime('%Y_%m_%d').replace('_0', '_')
+        full_path = os.path.join(base, date_fol, '*.hdf')
+        files = glob.glob(full_path)
+
+        for file in files:
+            fname = os.path.splitext(os.path.basename(file))[0]
+            ifos, name, fstart, dur = fname.split('-')
+
+            if float(fstart) + float(dur) < start or float(fstart) > end:
+                continue
+
+            url = os.path.abspath(file)
+            cache.append(CacheEntry("%s %s %s %s %s" % (ifos, name, 
+                                                        fstart,
+                                                        dur, url)))
+        date += oneday
+    return cache
+
+    
 
 def find_daily_cbc_files(channel, start, end, run='bns_gds',
                          filetag='30MILLISEC_CLUSTERED', ext='xml.gz'):
