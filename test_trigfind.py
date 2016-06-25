@@ -179,7 +179,7 @@ class TrigfindTestCase(unittest.TestCase):
 
     def test_find_pycbc_live_files(self):
         try:
-            cache = trigfind.find_pycbc_live_cbc_files(None, 0, 100)
+            cache = trigfind.find_pycbc_live_files(None, 0, 100)
         except ImportError as e:
             self.skipTest(str(e))
         else:
