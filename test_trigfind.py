@@ -177,6 +177,14 @@ class TrigfindTestCase(unittest.TestCase):
         self.assertRaises(ValueError, trigfind.find_detchar_files,
                           'X1:DOES-NOT_EXIST:1', 0, 100, etg='fake-etg')
 
+    def test_find_pycbc_live_files(self):
+        try:
+            cache = trigfind.find_pycbc_live_cbc_files(None, 0, 100)
+        except ImportError as e:
+            self.skipTest(str(e))
+        else:
+            self.assertIsInstance(cache, Cache)
+
     def test_find_daily_cbc_files(self):
         # can't do much without faking the entire thing
         try:
