@@ -178,12 +178,20 @@ class TrigfindTestCase(unittest.TestCase):
                           'X1:DOES-NOT_EXIST:1', 0, 100, etg='fake-etg')
 
     def test_find_pycbc_live_files(self):
-        try:
-            cache = trigfind.find_pycbc_live_files(None, 0, 100)
-        except ImportError as e:
-            self.skipTest(str(e))
-        else:
-            self.assertIsInstance(cache, Cache)
+        test_glob = ['H1-Live-1126259148.29-4.hdf',
+                     'H1-Live-1126259228.29-4.hdf', 
+                     'H1-Live-1126259308.29-4.hdf',
+                     'H1-Live-1126259388.29-4.hdf',
+                    ]
+
+        # outside times, so no return expected
+        with mock.patch('glob.glob', lambda x: test_glob):
+            c = trigfind.find_pycbc_live_files(None, 1135641617, 1135728017)
+            self.assertIsInstance(c, Cache)
+            self.assertEqual(len(c), 0)
+
+            c = trigfind.find_pycbc_live_files(None, 1126259140, 1126269148)
+            self.assertEqual(len(c), 4)
 
     def test_find_daily_cbc_files(self):
         # can't do much without faking the entire thing
