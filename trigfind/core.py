@@ -295,13 +295,12 @@ def find_pycbc_live_files(channel, start, end, run='official'):
                 continue
 
             url = os.path.abspath(file)
-            cache.append(CacheEntry("%s %s %s %s %s" % (ifos, name, 
+            cache.append(CacheEntry("%s %s %s %s %s" % (ifos, name,
                                                         fstart,
                                                         dur, url)))
         date += oneday
     return cache
 
-    
 
 def find_daily_cbc_files(channel, start, end, run='bns_gds',
                          filetag='30MILLISEC_CLUSTERED', ext='xml.gz'):

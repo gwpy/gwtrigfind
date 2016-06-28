@@ -179,7 +179,7 @@ class TrigfindTestCase(unittest.TestCase):
 
     def test_find_pycbc_live_files(self):
         test_glob = ['H1-Live-1126259148.29-4.hdf',
-                     'H1-Live-1126259228.29-4.hdf', 
+                     'H1-Live-1126259228.29-4.hdf',
                      'H1-Live-1126259308.29-4.hdf',
                      'H1-Live-1126259388.29-4.hdf',
                     ]
