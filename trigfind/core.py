@@ -227,7 +227,7 @@ def find_dmt_files(channel, start, end, base=None, etg='kw', ext='xml'):
 def _find_in_gps_dirs(globpath, start, end, ngps=5):
     span = Segment(start, end)
     form = '%%.%ss' % ngps
-    gps5 = int(form % start)
+    gps5 = max(0, int(form % start) - 1)
     end5 = int(form % end)
     out = Cache()
     append = out.append
