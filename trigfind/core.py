@@ -41,6 +41,9 @@ channel_delim = re.compile('[:_-]')
 
 OMICRON_O2_EPOCH = 1146873617
 
+DEFAULT_PYCBC_LIVE_BASE = os.path.join(
+    os.path.sep, 'home', 'ahnitz', 'pycbc_live', 'data')
+
 
 def find_trigger_files(channel, etg, start, end, **kwargs):
     """Find the paths of trigger files for this channel and ETG
@@ -245,7 +248,7 @@ def _format_channel_name(channel):
     return channel_delim.sub('_', channel).replace('_', '-', 1)
 
 
-def find_pycbc_live_files(channel, start, end, run='official'):
+def find_pycbc_live_files(channel, start, end, base=DEFAULT_PYCBC_LIVE_BASE):
     """ Find CBC pycbc live trigger files
 
     Parameters
@@ -259,12 +262,10 @@ def find_pycbc_live_files(channel, start, end, run='official'):
     end : `int`
         GPS end time of search
 
-    run : `str`, optional
-        name of daily CBC analysis that generated the files, defaults to
-        ``'official'``
-
-    ext : `str`, optional
-        file extension, defaults to ``'xml.gz'``
+    base : `str`, optional
+        the base path of the directory structure in which the event files
+        are located, this should be the parent directory of the '%Y_%m_%d'
+        directories
 
     Returns
     -------
@@ -272,10 +273,6 @@ def find_pycbc_live_files(channel, start, end, run='official'):
         a structured list of file URLS
     """
     from lal import gpstime
-
-    #FIXME This will need to be updated when the triggers are moved to a
-    # dedicated account and will then allow for alternate run directories
-    base = os.path.join(os.path.sep, 'home', 'ahnitz', 'pycbc_live', 'data')
 
     date = gpstime.gps_to_utc(start).date()
     date_end = gpstime.gps_to_utc(end).date()
