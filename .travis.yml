@@ -1,13 +1,29 @@
 language: python
 
+sudo: false
+dist: trusty
+
 addons:
   apt:
+    sources:
+      - sourceline: deb http://software.ligo.org/lscsoft/debian wheezy contrib
+        key_url: http://software.ligo.org/keys/deb/lscsoft.key
+      - sourceline: deb-src http://software.ligo.org/lscsoft/debian wheezy contrib
+        key_url: http://software.ligo.org/keys/deb/lscsoft.key
     packages:
-      - swig  # m2crypto
+      - pkg-config  # lal
+      - zlib1g-dev  # lal
+      - libgsl0-dev  # lal
+      - swig  # lal
+      - bc  # lal
+      - libfftw3-dev  # lal
+
+env:
+  global:
+    - LAL_VERSION="6.18.0"
 
 matrix:
   include:
-    - python: 2.6
     - python: 2.7
     - python: 3.5
     - python: nightly
@@ -20,6 +36,8 @@ matrix:
 before_install:
   - pip install -q --upgrade ${PRE} pip
   - pip install -q --upgrade ${PRE} coveralls "pytest>=2.8" unittest2 mock
+  - pip install -q --upgrade ${PRE} numpy  # for lal
+  - .travis/build-lal.sh
 
 install:
   - pip install ${PRE} -r requirements.txt
@@ -33,5 +51,11 @@ after_success:
   - coveralls
 
 cache:
-  - pip
-  - apt
+  apt: true
+  pip: true
+  directories:
+    - lal-${LAL_VERSION}
+
+before_cache:
+  - rm -f ${HOME}/.cache/pip/log/debug.log
+  - rm -f ./lal-${LAL_VERSION}/config.log
