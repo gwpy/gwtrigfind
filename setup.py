@@ -34,8 +34,8 @@ scripts = glob.glob(os.path.join('bin', '*'))
 
 # declare dependencies
 setup_requires = ['setuptools', 'pytest-runner']
-install_requires = ['lscsoft-glue>=1.56']
-requires = ['glue']
+install_requires = ['lscsoft-glue>=1.56', 'python-dateutil']
+requires = ['glue', 'dateutil']
 tests_require = ['pytest']
 if sys.version_info < (2, 7):
     tests_require.append('unittest2')
