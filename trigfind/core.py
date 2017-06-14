@@ -42,7 +42,7 @@ channel_delim = re.compile('[:_-]')
 OMICRON_O2_EPOCH = 1146873617
 
 DEFAULT_PYCBC_LIVE_BASE = os.path.join(
-    os.path.sep, 'home', 'ahnitz', 'pycbc_live', 'data')
+    os.path.sep, 'home', 'pycbc.live', 'triggers', 'data')
 
 
 def find_trigger_files(channel, etg, start, end, **kwargs):
