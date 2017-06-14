@@ -47,3 +47,7 @@ cache:
   pip: true
   directories:
     - lal-${LAL_VERSION}
+
+before_cache:
+  - rm -f ${HOME}/.cache/pip/log/debug.log
+  - rm -f ./lal-${LAL_VERSION}/config.log
