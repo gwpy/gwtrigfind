@@ -2,6 +2,11 @@ language: python
 
 addons:
   apt:
+    sources:
+      - sourceline: deb http://software.ligo.org/lscsoft/debian wheezy contrib
+        key_url: http://software.ligo.org/keys/deb/lscsoft.key
+      - sourceline: deb-src http://software.ligo.org/lscsoft/debian wheezy contrib
+        key_url: http://software.ligo.org/keys/deb/lscsoft.key
     packages:
       - pkg-config  # lal
       - zlib1g-dev  # lal
