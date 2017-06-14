@@ -1,5 +1,4 @@
 language: python
-
 sudo: false
 dist: trusty
 
@@ -18,44 +17,43 @@ addons:
       - bc  # lal
       - libfftw3-dev  # lal
 
+python:
+  - '2.7'
+  - '3.5'
+  - '3.6'
+  - 'nightly'
+
 env:
   global:
     - LAL_VERSION="6.18.0"
 
 matrix:
-  include:
-    - python: 2.7
-    - python: 3.5
-    - python: nightly
-      env: PRE="--pre"
   allow_failures:
-    - python: 3.5
-    - python: nightly
-      env: PRE="--pre"
+    - python: 'nightly'
 
 before_install:
-  - pip install -q --upgrade ${PRE} pip
-  - pip install -q --upgrade ${PRE} coveralls "pytest>=2.8" unittest2 mock
-  - pip install -q --upgrade ${PRE} numpy  # for lal
+  - pip install --quiet --upgrade pip
+  - pip install --quiet --upgrade coveralls "pytest>=2.8" unittest2 mock
+  - pip install --quiet --upgrade numpy  # for lal
   - .travis/build-lal.sh
 
 install:
-  - pip install ${PRE} -r requirements.txt
-  - pip install .
+  - pip install -r requirements.txt
+  - pip install --editable .
 
 script:
-  - coverage run --source=trigfind --omit="trigfind/_version.py" ./setup.py test
-  - coverage run --append --source=trigfind --omit="trigfind/_version.py" `which trigfind` --help
+  - coverage run ./setup.py test
+  - coverage run --append `which trigfind` --help
 
 after_success:
   - coveralls
+
+before_cache:
+  - rm -f ${HOME}/.cache/pip/log/debug.log
+  - rm -f ./lal-${LAL_VERSION}/config.log
 
 cache:
   apt: true
   pip: true
   directories:
     - lal-${LAL_VERSION}
-
-before_cache:
-  - rm -f ${HOME}/.cache/pip/log/debug.log
-  - rm -f ./lal-${LAL_VERSION}/config.log
