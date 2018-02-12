@@ -248,8 +248,9 @@ def find_dmt_omega_files(channel, start, end, base=None, ext='xml'):
     if hoft:
         tag = '{}-HOFT_Omega'.format(site)
     else:
-        raise NotImplementedError("This method doesn't know how to locate "
-                                  "%s files for %r" % (etg, str(channel)))
+        raise NotImplementedError(
+            "This method doesn't know how to locate "
+            "DMT-Omega files for {}".format(str(channel)))
     if base is None:
         base = os.path.join(os.sep, 'gds-{}'.format(ifo.lower()), 'dmt',
                             'triggers', tag, '{0}')
