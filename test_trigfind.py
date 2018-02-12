@@ -101,40 +101,37 @@ class TrigfindTestCase(unittest.TestCase):
 
     def test_find_trigger_files(self):
         # quick check that this resolves the ETG correctly
-        iglob = mock_iglob_factory('L1-GDS_CALIB_STRAIN_OmegaC-{0}-{1}.xml')
+        iglob = mock_iglob_factory('L1-OMEGA_TRIGGERS_DOWNSELECT-{0}-{1}.xml')
         with mock.patch('glob.iglob', iglob):
             cache = trigfind.find_trigger_files(
                 'L1:GDS-CALIB_STRAIN', 'dmt-omega', 1135641617, 1135728017)
             self.assertIsInstance(cache, Cache)
             self.assertEqual(len(cache), 9)
-            self.assertEqual(cache[0].path,
-                             '/gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
-                             'L1-GDS_CALIB_STRAIN_OmegaC-1135640000-10000.xml')
+            self.assertEqual(
+                cache[0].path,
+                '/gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
+                'L1-OMEGA_TRIGGERS_DOWNSELECT-1135640000-10000.xml')
 
-    def test_find_dmt_files(self):
-        # check error for unknown ETG
-        self.assertRaises(NotImplementedError, trigfind.find_dmt_files,
-                          None, 0, 100, etg='fake-etg')
-
-    def test_find_dmt_files_dmt_omega(self):
-        iglob = mock_iglob_factory('L1-GDS_CALIB_STRAIN_OmegaC-{0}-{1}.xml')
+    def test_find_dmt_omega_files(self):
+        iglob = mock_iglob_factory('L1-OMEGA_TRIGGERS_DOWNSELECT-{0}-{1}.xml')
         with mock.patch('glob.iglob', iglob):
-            cache = trigfind.find_dmt_files(
-                'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017, etg='dmt-omega')
+            cache = trigfind.find_dmt_omega_files(
+                'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017)
             self.assertIsInstance(cache, Cache)
             self.assertEqual(len(cache), 9)
-            self.assertEqual(cache[0].path,
-                             '/gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
-                             'L1-GDS_CALIB_STRAIN_OmegaC-1135640000-10000.xml')
+            self.assertEqual(
+                cache[0].path,
+                '/gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
+                'L1-OMEGA_TRIGGERS_DOWNSELECT-1135640000-10000.xml')
         # check error for non-hoft channel with DMT-Omega
-        self.assertRaises(NotImplementedError, trigfind.find_dmt_files,
-                          'X1:TEST', 0, 100, etg='dmt-omega')
+        self.assertRaises(NotImplementedError, trigfind.find_dmt_omega_files,
+                          'X1:TEST', 0, 100)
 
-    def test_find_dmt_files_kleinewelle(self):
+    def test_find_kleinewelle_files(self):
         iglob = mock_iglob_factory('L-KW_TRIGGERS-{0}-{1}.xml')
         with mock.patch('glob.iglob', iglob):
-            cache = trigfind.find_dmt_files('L1:TEST-CHANNEL', 1135641617,
-                                            1135728017, etg='kleinewelle')
+            cache = trigfind.find_kleinewelle_files(
+                'L1:TEST-CHANNEL', 1135641617, 1135728017)
             self.assertIsInstance(cache, Cache)
             self.assertEqual(len(cache), 9)
             self.assertEqual(cache[0].path,
@@ -144,8 +141,8 @@ class TrigfindTestCase(unittest.TestCase):
         # test h(t)
         iglob = mock_iglob_factory('L-KW_HOFT-{0}-{1}.xml')
         with mock.patch('glob.iglob', iglob):
-            cache = trigfind.find_dmt_files('L1:GDS-CALIB_STRAIN', 1135641617,
-                                            1135728017, etg='kleinewelle')
+            cache = trigfind.find_kleinewelle_files(
+                'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017)
             self.assertIsInstance(cache, Cache)
             self.assertEqual(len(cache), 9)
             self.assertEqual(cache[0].path,
