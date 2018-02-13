@@ -256,7 +256,7 @@ def find_dmt_omega_files(channel, start, end, base=None, ext='xml'):
                             'triggers', tag, '{0}')
 
     # loop over GPS directories and find files
-    filename = '{}-OMEGA_TRIGGERS_DOWNSELECT-*.{}'.format(ifo, ext)
+    filename = '{}-{}_OmegaC-*-*.{}'.format(ifo, name, ext)
     return _find_in_gps_dirs(os.path.join(base, filename), start, end, ngps=5)
 
 
