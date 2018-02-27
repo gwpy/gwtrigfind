@@ -27,7 +27,9 @@ import re
 import datetime
 import warnings
 
-from glue.lal import (Cache, CacheEntry)
+from lal.utils import CacheEntry
+
+from glue.lal import Cache
 from glue.segments import segment as Segment
 
 __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
