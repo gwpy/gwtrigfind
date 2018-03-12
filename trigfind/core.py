@@ -79,7 +79,8 @@ def find_trigger_files(channel, etg, start, end, **kwargs):
     --------
     trigfind.find_detchar_files
     trigfind.find_daily_cbc_files
-    trigfind.find_dmt_files
+    trigfind.find_dmt_omega_files
+    trigfind.find_kleinewelle_files
     trigfind.find_omega_online_files
 
     Examples
@@ -97,9 +98,10 @@ def find_trigger_files(channel, etg, start, end, **kwargs):
         finder = find_pycbc_live_files
     elif omega.match(etg):
         finder = find_omega_online_files
-    elif kleinewelle.match(etg) or dmt_omega.match(etg):
-        finder = find_dmt_files
-        kwargs['etg'] = etg
+    elif kleinewelle.match(etg):
+        finder = find_kleinewelle_files
+    elif dmt_omega.match(etg):
+        finder = find_dmt_omega_files
     else:
         finder = find_detchar_files
         kwargs['etg'] = etg
@@ -168,7 +170,52 @@ def find_detchar_files(channel, start, end, etg='omicron', ext='xml.gz'):
                              start, end, ngps=5)
 
 
-def find_dmt_files(channel, start, end, base=None, etg='kw', ext='xml'):
+def find_kleinewelle_files(channel, start, end, base=None, ext='xml'):
+    """Find KleineWelle output event files
+
+    Parameters
+    ----------
+    channel : `str`
+        name of data channel for which to search
+
+    start : `int`
+        GPS start time of search
+
+    end : `int`
+        GPS end time of search
+
+    base : `str, optional
+        path of custom base directory, defaults to the LDG standard for
+        the given ``etg``
+
+    ext : `str`, optional
+        file extension, defaults to ``'xml'``
+
+    Returns
+    -------
+    files : :class:`~glue.lal.Cache`
+        a structured list of file URLS
+    """
+    span = Segment(int(start), int(end))
+    ifo, name = _format_channel_name(str(channel)).split('-', 1)
+    hoft = name == 'GDS_CALIB_STRAIN'
+    site = ifo[0].upper()
+
+    # find base path
+    if hoft:
+        tag = '%s-KW_HOFT' % site
+    else:
+        tag = '%s-KW_TRIGGERS' % site
+    if base is None:
+        base = os.path.join(os.sep, 'gds-{}'.format(ifo.lower()),
+                            'dmt', 'triggers', tag, '{}-{{0}}'.format(tag))
+
+    # loop over GPS directories and find files
+    filename = '%s-*-*.%s' % (tag, ext)
+    return _find_in_gps_dirs(os.path.join(base, filename), start, end, ngps=5)
+
+
+def find_dmt_omega_files(channel, start, end, base=None, ext='xml'):
     """Find DMT-Omega trigger XML files
 
     Parameters
@@ -186,10 +233,6 @@ def find_dmt_files(channel, start, end, base=None, etg='kw', ext='xml'):
         path of custom base directory, defaults to the LDG standard for
         the given ``etg``
 
-    etg : `str`, optional
-        name of trigger generator that processed the data, defaults to
-        ``'kw'``
-
     ext : `str`, optional
         file extension, defaults to ``'xml'``
 
@@ -198,34 +241,24 @@ def find_dmt_files(channel, start, end, base=None, etg='kw', ext='xml'):
     files : :class:`~glue.lal.Cache`
         a structured list of file URLS
     """
-    # validate ETG is sensible
-    if not kleinewelle.match(etg) and not dmt_omega.match(etg):
-        raise NotImplementedError("Unrecognised ETG %r for DMT files")
-
     span = Segment(int(start), int(end))
     ifo, name = _format_channel_name(str(channel)).split('-', 1)
     hoft = name == 'GDS_CALIB_STRAIN'
-    # find base path
     site = ifo[0].upper()
-    if base is None and kleinewelle.match(etg):
-        if hoft:
-            tag = '%s-KW_HOFT' % site
-        else:
-            tag = '%s-KW_TRIGGERS' % site
-        base = '/gds-%s/dmt/triggers/%s/%s-{0}' % (ifo.lower(), tag, tag)
-    elif base is None and dmt_omega.match(etg):
-        if hoft:
-            tag = '%s-HOFT_Omega' % site
-        else:
-            raise NotImplementedError("This method doesn't know how to locate "
-                                      "%s files for %r" % (etg, str(channel)))
-        base = '/gds-%s/dmt/triggers/%s/{0}' % (ifo.lower(), tag)
-    # find file name format
-    if dmt_omega.match(etg):
-        filename = '%s-%s_OmegaC-*-*.%s' % (ifo, name, ext)
+
+    # find base path
+    if hoft:
+        tag = '{}-HOFT_Omega'.format(site)
     else:
-        filename = '%s-*-*.%s' % (tag, ext)
+        raise NotImplementedError(
+            "This method doesn't know how to locate "
+            "DMT-Omega files for {}".format(str(channel)))
+    if base is None:
+        base = os.path.join(os.sep, 'gds-{}'.format(ifo.lower()), 'dmt',
+                            'triggers', tag, '{0}')
+
     # loop over GPS directories and find files
+    filename = '{}-{}_OmegaC-*-*.{}'.format(ifo, name, ext)
     return _find_in_gps_dirs(os.path.join(base, filename), start, end, ngps=5)
 
 

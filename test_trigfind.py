@@ -69,7 +69,6 @@ def mock_iglob_factory(fileformat):
         t = gpsstart
         while t < gpsend:
             f = os.path.join(parent, fileformat.format(t, d))
-            print(f)
             t += d
             yield f
     return mock_gps_glob
@@ -101,51 +100,56 @@ class TrigfindTestCase(unittest.TestCase):
 
     def test_find_trigger_files(self):
         # quick check that this resolves the ETG correctly
-        iglob = mock_iglob_factory('L1-GDS_CALIB_STRAIN_OmegaC-{0}-{1}.xml')
+        iglob = mock_iglob_factory('L1-OMEGA_TRIGGERS_DOWNSELECT-{0}-{1}.xml')
         with mock.patch('glob.iglob', iglob):
             cache = trigfind.find_trigger_files(
                 'L1:GDS-CALIB_STRAIN', 'dmt-omega', 1135641617, 1135728017)
             self.assertIsInstance(cache, Cache)
             self.assertEqual(len(cache), 9)
-            self.assertEqual(cache[0].path,
-                             '/gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
-                             'L1-GDS_CALIB_STRAIN_OmegaC-1135640000-10000.xml')
+            self.assertEqual(
+                cache[0].path,
+                '/gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
+                'L1-OMEGA_TRIGGERS_DOWNSELECT-1135640000-10000.xml')
 
-    def test_find_dmt_files(self):
-        # check error for unknown ETG
-        self.assertRaises(NotImplementedError, trigfind.find_dmt_files,
-                          None, 0, 100, etg='fake-etg')
-
-    def test_find_dmt_files_dmt_omega(self):
-        iglob = mock_iglob_factory('L1-GDS_CALIB_STRAIN_OmegaC-{0}-{1}.xml')
+    def test_find_dmt_omega_files(self):
+        iglob = mock_iglob_factory('L1-OMEGA_TRIGGERS_DOWNSELECT-{0}-{1}.xml')
         with mock.patch('glob.iglob', iglob):
-            cache = trigfind.find_dmt_files(
-                'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017, etg='dmt-omega')
+            cache = trigfind.find_dmt_omega_files(
+                'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017)
             self.assertIsInstance(cache, Cache)
             self.assertEqual(len(cache), 9)
-            self.assertEqual(cache[0].path,
-                             '/gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
-                             'L1-GDS_CALIB_STRAIN_OmegaC-1135640000-10000.xml')
-        # check error for non-hoft channel with DMT-Omega
-        self.assertRaises(NotImplementedError, trigfind.find_dmt_files,
-                          'X1:TEST', 0, 100, etg='dmt-omega')
+            self.assertEqual(
+                cache[0].path,
+                '/gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
+                'L1-OMEGA_TRIGGERS_DOWNSELECT-1135640000-10000.xml')
+            # check wrapper method works
+            self.assertListEqual(cache, trigfind.find_trigger_files(
+                'L1:GDS-CALIB_STRAIN', 'dmt-omega', 1135641617, 1135728017))
 
-    def test_find_dmt_files_kleinewelle(self):
+        # check error for non-hoft channel with DMT-Omega
+        self.assertRaises(NotImplementedError, trigfind.find_dmt_omega_files,
+                          'X1:TEST', 0, 100)
+
+    def test_find_kleinewelle_files(self):
         iglob = mock_iglob_factory('L-KW_TRIGGERS-{0}-{1}.xml')
         with mock.patch('glob.iglob', iglob):
-            cache = trigfind.find_dmt_files('L1:TEST-CHANNEL', 1135641617,
-                                            1135728017, etg='kleinewelle')
+            cache = trigfind.find_kleinewelle_files(
+                'L1:TEST-CHANNEL', 1135641617, 1135728017)
             self.assertIsInstance(cache, Cache)
             self.assertEqual(len(cache), 9)
             self.assertEqual(cache[0].path,
                              '/gds-l1/dmt/triggers/L-KW_TRIGGERS/'
                              'L-KW_TRIGGERS-11356/'
                              'L-KW_TRIGGERS-1135640000-10000.xml')
+            # check wrapper method works
+            self.assertListEqual(cache, trigfind.find_trigger_files(
+                'L1:TEST-CHANNEL', 'kleinewelle', 1135641617, 1135728017))
+
         # test h(t)
         iglob = mock_iglob_factory('L-KW_HOFT-{0}-{1}.xml')
         with mock.patch('glob.iglob', iglob):
-            cache = trigfind.find_dmt_files('L1:GDS-CALIB_STRAIN', 1135641617,
-                                            1135728017, etg='kleinewelle')
+            cache = trigfind.find_kleinewelle_files(
+                'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017)
             self.assertIsInstance(cache, Cache)
             self.assertEqual(len(cache), 9)
             self.assertEqual(cache[0].path,
@@ -166,13 +170,18 @@ class TrigfindTestCase(unittest.TestCase):
                     cache[0].path,
                     '/home/detchar/triggers/*/L1/GDS-CALIB_STRAIN_Omicron/'
                     '11356/L1-GDS_CALIB_STRAIN_OMICRON-1135640000-10000.xml')
-                cache = trigfind.find_detchar_files(
+                cache2 = trigfind.find_detchar_files(
                     'L1:GDS-CALIB_STRAIN', 1146873617, 1146873617+1,
                     etg='omicron')
                 self.assertEqual(
-                    cache[0].path,
+                    cache2[0].path,
                     '/home/detchar/triggers/L1/GDS_CALIB_STRAIN_OMICRON/11468/'
                     'L1-GDS_CALIB_STRAIN_OMICRON-1146870000-10000.xml')
+
+                # check wrapper method works
+                self.assertListEqual(cache, trigfind.find_trigger_files(
+                    'L1:GDS-CALIB_STRAIN', 'omicron', 1135641617, 1135728017))
+
         # test error for channel that has never been processed
         self.assertRaises(ValueError, trigfind.find_detchar_files,
                           'X1:DOES-NOT_EXIST:1', 0, 100, etg='fake-etg')
@@ -193,9 +202,14 @@ class TrigfindTestCase(unittest.TestCase):
 
                 c = trigfind.find_pycbc_live_files(None, 1126259140, 1126269148)
                 self.assertEqual(len(c), 4)
+
+                # check wrapper method works
+                self.assertListEqual(c, trigfind.find_trigger_files(
+                    None, 'pycbc-live', 1126259140, 1126269148))
+
         except ImportError as e:
             self.skipTest(str(e))
-            
+
     def test_find_daily_cbc_files(self):
         # can't do much without faking the entire thing
         try:
@@ -204,6 +218,8 @@ class TrigfindTestCase(unittest.TestCase):
             self.skipTest(str(e))
         else:
             self.assertIsInstance(cache, Cache)
+            self.assertListEqual(cache, trigfind.find_trigger_files(
+                'L1:GDS-CALIB_STRAIN', 'daily-cbc', 0, 100))
 
     def test_find_omega_online_files(self):
         iglob = mock_iglob_factory('G1-OMEGA_TRIGGERS_DOWNSELECT-{0}-{1}.txt')
@@ -216,6 +232,11 @@ class TrigfindTestCase(unittest.TestCase):
                 cache[0].path,
                 '/home/omega/online/G1_DER_DATA_H/segments/11356/*/'
                 'G1-OMEGA_TRIGGERS_DOWNSELECT-1135640000-10000.txt')
+
+            # check wrapper method works
+            self.assertListEqual(cache, trigfind.find_trigger_files(
+                'G1:DER_DATA_H', 'omega', 1135641617, 1135728017))
+
         self.assertRaises(NotImplementedError,
                           trigfind.find_omega_online_files, 'L1:TEST-CHANNEL',
                           0, 100)
