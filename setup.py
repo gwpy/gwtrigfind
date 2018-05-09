@@ -33,12 +33,15 @@ packages = find_packages()
 scripts = glob.glob(os.path.join('bin', '*'))
 
 # declare dependencies
-setup_requires = ['setuptools', 'pytest-runner']
+setup_requires = ['setuptools']
 install_requires = ['lscsoft-glue>=1.56', 'python-dateutil']
-requires = ['glue', 'dateutil']
+
 tests_require = ['pytest']
 if sys.version_info < (2, 7):
     tests_require.append('unittest2')
+if set(('pytest', 'test', 'prt')).intersection(sys.argv):
+    setup_requires = ['pytest_runner']
+
 
 # run setup
 setup(name='trigfind',
@@ -53,7 +56,6 @@ setup(name='trigfind',
       scripts=scripts,
       setup_requires=setup_requires,
       install_requires=install_requires,
-      requires=requires,
       tests_require=tests_require,
       use_2to3=False,
       classifiers=[
