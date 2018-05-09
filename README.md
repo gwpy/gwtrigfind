@@ -18,7 +18,7 @@ The resulting cache can then be read easily into a table using [`gwpy`](//gwpy.g
 
 ```python
 >>> from gwpy.table import EventTable
->>> t = EventTable.read(cache, format='ligolw.sngl_burst')
+>>> t = EventTable.read(cache, format='ligolw', tablename='sngl_burst')
 ```
 
 The format argument depends on the etg you use, but is likely to be one of `'ligolw.sngl_burst'`, `'ligolw.sngl_inspiral'`, or `'root'`.
