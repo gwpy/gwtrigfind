@@ -27,10 +27,11 @@ import re
 import datetime
 import warnings
 
+from ligo.segments import segment as Segment
+
 from lal.utils import CacheEntry
 
 from glue.lal import Cache
-from glue.segments import segment as Segment
 
 __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
 
