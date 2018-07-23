@@ -34,8 +34,9 @@ except ImportError:
 
 import pytest
 
-from glue.lal import (Cache, CacheEntry)
-from glue.segments import segment as Segment
+from ligo.segments import segment as Segment
+
+from lal.utils import CacheEntry
 
 import trigfind
 from trigfind import core
@@ -104,7 +105,6 @@ class TrigfindTestCase(unittest.TestCase):
         with mock.patch('glob.iglob', iglob):
             cache = trigfind.find_trigger_files(
                 'L1:GDS-CALIB_STRAIN', 'dmt-omega', 1135641617, 1135728017)
-            self.assertIsInstance(cache, Cache)
             self.assertEqual(len(cache), 9)
             self.assertEqual(
                 cache[0].path,
@@ -116,7 +116,6 @@ class TrigfindTestCase(unittest.TestCase):
         with mock.patch('glob.iglob', iglob):
             cache = trigfind.find_dmt_omega_files(
                 'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017)
-            self.assertIsInstance(cache, Cache)
             self.assertEqual(len(cache), 9)
             self.assertEqual(
                 cache[0].path,
@@ -135,7 +134,6 @@ class TrigfindTestCase(unittest.TestCase):
         with mock.patch('glob.iglob', iglob):
             cache = trigfind.find_kleinewelle_files(
                 'L1:TEST-CHANNEL', 1135641617, 1135728017)
-            self.assertIsInstance(cache, Cache)
             self.assertEqual(len(cache), 9)
             self.assertEqual(cache[0].path,
                              '/gds-l1/dmt/triggers/L-KW_TRIGGERS/'
@@ -150,7 +148,6 @@ class TrigfindTestCase(unittest.TestCase):
         with mock.patch('glob.iglob', iglob):
             cache = trigfind.find_kleinewelle_files(
                 'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017)
-            self.assertIsInstance(cache, Cache)
             self.assertEqual(len(cache), 9)
             self.assertEqual(cache[0].path,
                              '/gds-l1/dmt/triggers/L-KW_HOFT/'
@@ -164,7 +161,6 @@ class TrigfindTestCase(unittest.TestCase):
                 cache = trigfind.find_detchar_files(
                     'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017,
                     etg='omicron')
-                self.assertIsInstance(cache, Cache)
                 self.assertEqual(len(cache), 9)
                 self.assertEqual(
                     cache[0].path,
@@ -197,7 +193,6 @@ class TrigfindTestCase(unittest.TestCase):
         try:
             with mock.patch('glob.glob', lambda x: test_glob):
                 c = trigfind.find_pycbc_live_files(None, 1135641617, 1135728017)
-                self.assertIsInstance(c, Cache)
                 self.assertEqual(len(c), 0)
 
                 c = trigfind.find_pycbc_live_files(None, 1126259140, 1126269148)
@@ -217,7 +212,6 @@ class TrigfindTestCase(unittest.TestCase):
         except ImportError as e:
             self.skipTest(str(e))
         else:
-            self.assertIsInstance(cache, Cache)
             self.assertListEqual(cache, trigfind.find_trigger_files(
                 'L1:GDS-CALIB_STRAIN', 'daily-cbc', 0, 100))
 
@@ -226,7 +220,6 @@ class TrigfindTestCase(unittest.TestCase):
         with mock.patch('glob.iglob', iglob):
             cache = trigfind.find_omega_online_files(
                 'G1:DER_DATA_H', 1135641617, 1135728017)
-            self.assertIsInstance(cache, Cache)
             self.assertEqual(len(cache), 9)
             self.assertEqual(
                 cache[0].path,

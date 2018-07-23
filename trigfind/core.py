@@ -389,7 +389,8 @@ def find_daily_cbc_files(channel, start, end, run='bns_gds',
         except IOError:
             pass
         date += oneday
-    return out.unique()
+    # return unique list (preserving order)
+    return type(out)(OrderedDict.fromkeys(out))
 
 
 def find_omega_online_files(channel, start, end, filetag='DOWNSELECT',
