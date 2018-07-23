@@ -23,9 +23,14 @@ from __future__ import print_function
 
 import argparse
 import sys
+from operator import attrgetter
 
-from glue.lal import Cache
-from glue.segments import (segment as Segment, segmentlist as SegmentList)
+try:  # python >= 3
+    from functools import reduce
+except ImportError:  # python < 2 reduce is built-in
+    pass
+
+from ligo.segments import (segment as Segment, segmentlist as SegmentList)
 
 import trigfind
 
@@ -95,17 +100,12 @@ if trigfind.daily_cbc.match(args.etg):
     for key, arg in argmap.items():
         kwargs[key] = getattr(args, arg)
 
-cache = Cache()
+cache = list()
 for seg in segs:
     cache.extend(trigfind.find_trigger_files(
         args.channel, args.etg, start, end, **kwargs))
 
-# find gaps
-try:
-    known = cache.to_segmentlistdict()[args.channel.split(':')[0]] & segs
-except KeyError:
-    known = SegmentList()
-
+known = SegmentList(e.segment for e in cache) & segs
 if gaps:
     gaps = segs - known
 if gaps:
@@ -116,15 +116,15 @@ if gaps:
 # -- print files --------------------------------------------------------------
 
 if args.lal_cache:
-    cache.tofile(sys.stdout)
+    fmt = str
 elif args.names_only:
-    cache.topfnfile(sys.stdout)
+    fmt = attrgetter('path')
 else:
-    for e in cache:
-        print(e.url)
+    fmt = attrgetter('url')
+for e in cache:
+    print(fmt(e))
 
 # exit with appropriate code
 if gaps:
     sys.exit(1)
-else:
-    sys.exit(0)
+sys.exit(0)
