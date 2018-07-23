@@ -1,2 +1,3 @@
+python-dateutil
 ligo-segments >= 1.0.0
 lalsuite

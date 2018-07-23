@@ -34,7 +34,7 @@ scripts = glob.glob(os.path.join('bin', '*'))
 
 # declare dependencies
 setup_requires = ['setuptools']
-install_requires = ['ligo-segments', 'lalsuite']
+install_requires = ['python-dateutil', 'ligo-segments', 'lalsuite']
 tests_require = ['pytest']
 if {'pytest', 'test'}.intersection(sys.argv):
     setup_requires.append('pytest_runner')
