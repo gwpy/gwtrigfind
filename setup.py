@@ -34,7 +34,7 @@ scripts = glob.glob(os.path.join('bin', '*'))
 
 # declare dependencies
 setup_requires = ['setuptools']
-install_requires = ['lscsoft-glue>=1.56', 'python-dateutil']
+install_requires = []
 
 tests_require = ['pytest']
 if sys.version_info < (2, 7):

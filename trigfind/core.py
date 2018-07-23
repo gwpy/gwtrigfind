@@ -26,12 +26,11 @@ import os.path
 import re
 import datetime
 import warnings
+from collections import OrderedDict
 
 from ligo.segments import segment as Segment
 
 from lal.utils import CacheEntry
-
-from glue.lal import Cache
 
 __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
 
@@ -73,8 +72,8 @@ def find_trigger_files(channel, etg, start, end, **kwargs):
 
     Returns
     -------
-    files : :class:`~glue.lal.Cache`
-        a structured list of file URLS
+    files : `list` of :class:`lal.utils.CacheEntry`
+        a list of file URLs
 
     See Also
     --------
@@ -140,8 +139,8 @@ def find_detchar_files(channel, start, end, etg='omicron', ext='xml.gz'):
 
     Returns
     -------
-    files : :class:`~glue.lal.Cache`
-        a structured list of file URLS
+    files : `list` of :class:`lal.utils.CacheEntry`
+        a list of file URLs
     """
     ifo, name = _format_channel_name(channel).split('-', 1)
     # find base path relative to O1 or O2 formatting
@@ -194,8 +193,8 @@ def find_kleinewelle_files(channel, start, end, base=None, ext='xml'):
 
     Returns
     -------
-    files : :class:`~glue.lal.Cache`
-        a structured list of file URLS
+    files : `list` of :class:`lal.utils.CacheEntry`
+        a list of file URLs
     """
     span = Segment(int(start), int(end))
     ifo, name = _format_channel_name(str(channel)).split('-', 1)
@@ -239,8 +238,8 @@ def find_dmt_omega_files(channel, start, end, base=None, ext='xml'):
 
     Returns
     -------
-    files : :class:`~glue.lal.Cache`
-        a structured list of file URLS
+    files : `list` of :class:`lal.utils.CacheEntry`
+        a list of file URLs
     """
     span = Segment(int(start), int(end))
     ifo, name = _format_channel_name(str(channel)).split('-', 1)
@@ -268,7 +267,7 @@ def _find_in_gps_dirs(globpath, start, end, ngps=5):
     form = '%%.%ss' % ngps
     gps5 = max(0, int(form % start) - 1)
     end5 = int(form % end)
-    out = Cache()
+    out = list()
     append = out.append
     while gps5 <= end5:
         for f in glob.iglob(globpath.format(gps5)):
@@ -276,8 +275,8 @@ def _find_in_gps_dirs(globpath, start, end, ngps=5):
             if ce.segment.intersects(span):
                 append(ce)
         gps5 += 1
-    out.sort(key=lambda e: e.path)
-    return out.unique()
+    # return unique list (preserving order)
+    return type(out)(OrderedDict.fromkeys(out))
 
 
 def _format_channel_name(channel):
@@ -305,8 +304,8 @@ def find_pycbc_live_files(channel, start, end, base=DEFAULT_PYCBC_LIVE_BASE):
 
     Returns
     -------
-    files : :class:`~glue.lal.Cache`
-        a structured list of file URLS
+    files : `list` of :class:`lal.utils.CacheEntry`
+        a list of file URLs
     """
     from lal import gpstime
 
@@ -314,7 +313,7 @@ def find_pycbc_live_files(channel, start, end, base=DEFAULT_PYCBC_LIVE_BASE):
     date_end = gpstime.gps_to_utc(end).date()
     oneday = datetime.timedelta(days=1)
 
-    cache = Cache()
+    cache = list()
     while date <= date_end:
         date_fol = date.strftime('%Y_%m_%d').replace('_0', '_')
         full_path = os.path.join(base, date_fol, '*.hdf')
@@ -363,8 +362,8 @@ def find_daily_cbc_files(channel, start, end, run='bns_gds',
 
     Returns
     -------
-    files : :class:`~glue.lal.Cache`
-        a structured list of file URLS
+    files : `list` of :class:`lal.utils.CacheEntry`
+        a list of file URLs
     """
     from lal import gpstime
     span = Segment(start, end)
@@ -375,14 +374,18 @@ def find_daily_cbc_files(channel, start, end, run='bns_gds',
     end = gpstime.gps_to_utc(end).date()
     oneday = datetime.timedelta(days=1)
     filename = '%s-INSPIRAL_%s.cache' % (ifo, filetag)
-    out = Cache()
+    out = list()
+    append = out.append
     while date <= end:
         day = date.strftime('%Y%m%d')
         month = day[:6]
         cachefile = os.path.join(base, month, day, 'cache', filename)
         try:
             with open(cachefile, 'r') as f:
-                out.extend(Cache.fromfile(f).sieve(segment=span))
+                for line in f:
+                    e = CacheEntry(line)
+                    if e.segment.intersects(span):
+                        append(e)
         except IOError:
             pass
         date += oneday
@@ -415,8 +418,8 @@ def find_omega_online_files(channel, start, end, filetag='DOWNSELECT',
 
     Returns
     -------
-    files : :class:`~glue.lal.Cache`
-        a structured list of file URLS
+    files : `list` of :class:`lal.utils.CacheEntry`
+        a list of file URLs
     """
 
     # find base path

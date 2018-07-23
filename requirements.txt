@@ -1,2 +1,0 @@
-lscsoft-glue>=1.56
-python-dateutil
