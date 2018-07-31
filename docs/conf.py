@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# trigfind documentation build configuration file, created by
+# GWTrigFind documentation build configuration file, created by
 # sphinx-quickstart on Fri May 20 16:50:21 2016.
 #
 # This file is execfile()d with the current directory set to its
@@ -17,7 +17,7 @@ import os
 
 import sphinx_bootstrap_theme
 
-from trigfind import _version as trigfind_version
+from gwtrigfind import _version as gwtrigfind_version
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -58,7 +58,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'trigfind'
+project = u'gwtrigfind'
 copyright = u'2016, Duncan Macleod'
 author = u'Duncan Macleod'
 
@@ -67,7 +67,7 @@ author = u'Duncan Macleod'
 # built documents.
 #
 # The full version, including alpha/beta/rc tags.
-release = trigfind_version.get_versions()['version']
+release = gwtrigfind_version.get_versions()['version']
 # The short X.Y version.
 version = release.split('+')[0]
 
@@ -130,7 +130,7 @@ html_theme_options = {
     'bootswatch_theme': 'flatly',
     'navbar_site_name': 'API',
     'navbar_links': [
-        ('GitHub', '//github.com/ligovirgo/trigfind/', True),
+        ('GitHub', '//github.com/gwpy/gwtrigfind/', True),
     ],
 }
 
@@ -139,7 +139,7 @@ html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
-#html_title = u'trigfind v0.3'
+#html_title = u'gwtrigfind v0.3'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
@@ -221,7 +221,7 @@ html_static_path = ['_static']
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'trigfinddoc'
+htmlhelp_basename = 'gwtrigfinddoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -243,7 +243,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'trigfind.tex', u'trigfind Documentation',
+    (master_doc, 'gwtrigfind.tex', u'gwtrigfind Documentation',
      u'Duncan Macleod', 'manual'),
 ]
 
@@ -273,7 +273,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'trigfind', u'trigfind Documentation',
+    (master_doc, 'gwtrigfind', u'gwtrigfind Documentation',
      [author], 1)
 ]
 
@@ -287,8 +287,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'trigfind', u'trigfind Documentation',
-     author, 'trigfind', 'One line description of project.',
+    (master_doc, 'gwtrigfind', u'gwtrigfind Documentation',
+     author, 'gwtrigfind', 'One line description of project.',
      'Miscellaneous'),
 ]
 

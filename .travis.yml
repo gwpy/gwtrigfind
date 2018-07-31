@@ -22,7 +22,7 @@ install:
 
 script:
   - coverage run ./setup.py test
-  - coverage run --append `which trigfind` --help
+  - coverage run --append `which gwtrigfind` --help
 
 after_success:
   - coveralls

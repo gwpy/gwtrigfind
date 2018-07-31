@@ -1,20 +1,20 @@
 #!/usr/bin/python
 # Copyright (C) Duncan Macleod (2016)
 #
-# This file is part of Trigfind.
+# This file is part of GWTrigFind.
 #
-# Trigfind is free software: you can redistribute it and/or modify
+# GWTrigFind is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# Trigfind is distributed in the hope that it will be useful,
+# GWTrigFind is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Trigfind.  If not, see <http://www.gnu.org/licenses/>.
+# along with GWTrigFind.  If not, see <http://www.gnu.org/licenses/>.
 
 """Print GW event trigger file paths
 """
@@ -32,16 +32,16 @@ except ImportError:  # python < 2 reduce is built-in
 
 from ligo.segments import (segment as Segment, segmentlist as SegmentList)
 
-import trigfind
+import gwtrigfind
 
 __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
-__version__ = trigfind.__version__
+__version__ = gwtrigfind.__version__
 
 # -- parse command line -------------------------------------------------------
 
 # build parser
 parser = argparse.ArgumentParser(
-    description=__doc__,
+    prog='gwtrigfind', description=__doc__,
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-V', '--version', action='version', version=__version__)
 
@@ -96,13 +96,13 @@ cbcmap = {
     'filetag': 'file_tag',
     'run': 'run_type',
 }
-if trigfind.daily_cbc.match(args.etg):
+if gwtrigfind.daily_cbc.match(args.etg):
     for key, arg in argmap.items():
         kwargs[key] = getattr(args, arg)
 
 cache = list()
 for seg in segs:
-    cache.extend(trigfind.find_trigger_files(
+    cache.extend(gwtrigfind.find_trigger_files(
         args.channel, args.etg, start, end, **kwargs))
 
 known = SegmentList(e.segment for e in cache) & segs

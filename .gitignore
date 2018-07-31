@@ -6,7 +6,7 @@
 /dist/
 /eggs/
 /.eggs/
-/trigfind.egg-info/
+/*.egg-info/
 /.cache
 
 # docs
