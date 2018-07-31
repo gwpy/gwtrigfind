@@ -1,0 +1,5 @@
+gwtrigfind (0.7.0-1) unstable; urgency=low
+
+  * first debian release
+
+ -- Duncan Macleod <duncan.macleod@ligo.org>  Tue, 31 Jul 2018 14:00:00 +0100

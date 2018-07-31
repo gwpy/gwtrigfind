@@ -1,0 +1,46 @@
+# -- gwtrigfind source package ------------------------------------------------
+
+Source: gwtrigfind
+Maintainer: Duncan Macleod <duncan.macleod@ligo.org>
+Section: python
+Priority: optional
+Standards-Version: 3.9.1
+X-Python-Version: >= 2.7
+X-Python3-Version: >= 3.4
+Build-Depends: debhelper (>= 9),
+               dh-python,
+               python-all,
+               python3-all,
+               python-setuptools,
+               python3-setuptools,
+               python-astropy,
+               python3-astropy,
+               python-ligo-segments,
+               python3-ligo-segments,
+               python-pytest (>= 2.8.0),
+               python3-pytest (>= 2.8.0),
+               python-mock
+
+# -- python-gwtrigfind --------------------------------------------------------
+
+Package: python-gwtrigfind
+Architecture: all
+Depends: ${misc:Depends},
+         ${python:Depends},
+         python-astropy,
+         python-ligo-segments
+Description: A python2 module with command-line wrapper used to locate event
+             trigger files from any of the automatically-running GW event
+             trigger generators.
+
+# -- python3-gwtrigfind -------------------------------------------------------
+
+Package: python3-gwtrigfind
+Architecture: all
+Depends: ${misc:Depends},
+         ${python3:Depends},
+         python3-astropy,
+         python3-ligo-segments
+Description: A python3 module with command-line wrapper used to locate event
+             trigger files from any of the automatically-running GW event
+             trigger generators.
