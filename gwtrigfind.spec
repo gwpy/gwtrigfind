@@ -1,5 +1,5 @@
 %define name    gwtrigfind
-%define version 0.7.0
+%define version 0.6.0
 %define release 1
 
 Name:      %{name}
@@ -63,4 +63,4 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Jul 30 2018 Duncan Macleod <duncan.macleod@ligo.org>
-- 0.7.0 first RPM build
+- 0.6.0 first RPM build
