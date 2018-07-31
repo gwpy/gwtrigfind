@@ -64,10 +64,10 @@ def _as_url(path):
 
 
 def find_trigger_files(channel, etg, start, end, **kwargs):
-    """Find the paths of trigger files for this channel and ETG.
+    """Find the paths of trigger files for this channel and ETG
 
     This method uses an ETG-specific finder function to retrieve the
-    file paths.
+    file paths
 
     Parameters
     ----------
@@ -125,15 +125,15 @@ def find_trigger_files(channel, etg, start, end, **kwargs):
 
 
 def find_trigger_urls(*args, **kwargs):
-    """DEPRECATED: use :func:`find_trigger_files` instead
-    """
     warnings.warn("this method was renamed find_trigger_files",
                   DeprecationWarning)
     return find_trigger_files(*args, **kwargs)
 
+find_trigger_urls.__doc__ = find_trigger_files.__doc__
+
 
 def find_detchar_files(channel, start, end, etg='omicron', ext='xml.gz'):
-    """Find files in the detchar home directory following T1300468
+    """Find files in the detchar home directory followind T1300468
 
     Parameters
     ----------
@@ -200,7 +200,7 @@ def find_kleinewelle_files(channel, start, end, base=None, ext='xml'):
     end : `int`
         GPS end time of search
 
-    base : `str`, optional
+    base : `str, optional
         path of custom base directory, defaults to the LDG standard for
         the given ``etg``
 
@@ -232,7 +232,7 @@ def find_kleinewelle_files(channel, start, end, base=None, ext='xml'):
 
 
 def find_dmt_omega_files(channel, start, end, base=None, ext='xml'):
-    """Find DMT-Omega trigger XML files.
+    """Find DMT-Omega trigger XML files
 
     Parameters
     ----------
@@ -245,7 +245,7 @@ def find_dmt_omega_files(channel, start, end, base=None, ext='xml'):
     end : `int`
         GPS end time of search
 
-    base : `str`, optional
+    base : `str, optional
         path of custom base directory, defaults to the LDG standard for
         the given ``etg``
 

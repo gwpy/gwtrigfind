@@ -21,13 +21,12 @@ install:
         coveralls \
         "pytest>=2.8" \
         "mock ; python_version < '3'"
-  - pip install -r requirements-doc.txt
+  - pip install -r requirements.txt
   - pip install --editable .
 
 script:
   - coverage run ./setup.py test
   - coverage run --append `which gwtrigfind` --help
-  - python setup.py build_sphinx -W
 
 after_success:
   - coveralls
