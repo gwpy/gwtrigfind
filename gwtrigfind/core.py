@@ -28,9 +28,14 @@ import datetime
 import warnings
 from collections import OrderedDict
 
-from ligo.segments import segment as Segment
+try:
+    from urllib.parse import urlparse
+except ImportError:  # python < 3
+    from urlparse import urlparse
 
-from lal.utils import CacheEntry
+from astropy.time import Time
+
+from ligo.segments import segment as Segment
 
 __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
 
@@ -45,6 +50,17 @@ OMICRON_O2_EPOCH = 1146873617
 
 DEFAULT_PYCBC_LIVE_BASE = os.path.join(
     os.path.sep, 'home', 'pycbc.live', 'triggers', 'data')
+
+
+def _file_segment(path):
+    _, _, a, b = os.path.basename(path).split('-')
+    start = float(a)
+    duration = float(b.split('.')[0])
+    return Segment(start, start + duration)
+
+
+def _as_url(path):
+     return urlparse(os.path.abspath(path), scheme='file').geturl()
 
 
 def find_trigger_files(channel, etg, start, end, **kwargs):
@@ -72,7 +88,7 @@ def find_trigger_files(channel, etg, start, end, **kwargs):
 
     Returns
     -------
-    files : `list` of :class:`lal.utils.CacheEntry`
+    files : `list` of `str`
         a list of file URLs
 
     See Also
@@ -139,7 +155,7 @@ def find_detchar_files(channel, start, end, etg='omicron', ext='xml.gz'):
 
     Returns
     -------
-    files : `list` of :class:`lal.utils.CacheEntry`
+    files : `list` of `str`
         a list of file URLs
     """
     ifo, name = _format_channel_name(channel).split('-', 1)
@@ -193,7 +209,7 @@ def find_kleinewelle_files(channel, start, end, base=None, ext='xml'):
 
     Returns
     -------
-    files : `list` of :class:`lal.utils.CacheEntry`
+    files : `list` of `str`
         a list of file URLs
     """
     span = Segment(int(start), int(end))
@@ -238,7 +254,7 @@ def find_dmt_omega_files(channel, start, end, base=None, ext='xml'):
 
     Returns
     -------
-    files : `list` of :class:`lal.utils.CacheEntry`
+    files : `list` of `str`
         a list of file URLs
     """
     span = Segment(int(start), int(end))
@@ -271,9 +287,9 @@ def _find_in_gps_dirs(globpath, start, end, ngps=5):
     append = out.append
     while gps5 <= end5:
         for f in glob.iglob(globpath.format(gps5)):
-            ce = CacheEntry.from_T050017(os.path.realpath(f))
-            if ce.segment.intersects(span):
-                append(ce)
+            seg = _file_segment(f)
+            if seg.intersects(span):
+                append(_as_url(f))
         gps5 += 1
     # return unique list (preserving order)
     return type(out)(OrderedDict.fromkeys(out))
@@ -304,32 +320,27 @@ def find_pycbc_live_files(channel, start, end, base=DEFAULT_PYCBC_LIVE_BASE):
 
     Returns
     -------
-    files : `list` of :class:`lal.utils.CacheEntry`
+    files : `list` of `str`
         a list of file URLs
     """
-    from lal import gpstime
-
-    date = gpstime.gps_to_utc(start).date()
-    date_end = gpstime.gps_to_utc(end).date()
+    span = Segment(start, end)
+    date = Time(start, format='gps', scale='utc').datetime
+    date_end = Time(end, format='gps', scale='utc').datetime
     oneday = datetime.timedelta(days=1)
 
     cache = list()
+    append = cache.append
     while date <= date_end:
         date_fol = date.strftime('%Y_%m_%d').replace('_0', '_')
         full_path = os.path.join(base, date_fol, '*.hdf')
         files = glob.glob(full_path)
 
-        for file in files:
-            fname = os.path.splitext(os.path.basename(file))[0]
-            ifos, name, fstart, dur = fname.split('-')
+        for path in files:
+            seg = _file_segment(path)
 
-            if float(fstart) + float(dur) < start or float(fstart) > end:
-                continue
+            if seg.intersects(span):
+                append(_as_url(path))
 
-            url = os.path.abspath(file)
-            cache.append(CacheEntry("%s %s %s %s %s" % (ifos, name,
-                                                        fstart,
-                                                        dur, url)))
         date += oneday
     return cache
 
@@ -362,16 +373,16 @@ def find_daily_cbc_files(channel, start, end, run='bns_gds',
 
     Returns
     -------
-    files : `list` of :class:`lal.utils.CacheEntry`
+    files : `list` of `str`
         a list of file URLs
     """
-    from lal import gpstime
+
     span = Segment(start, end)
     ifo = channel.split(':')[0]
     base = os.path.join(os.path.sep, 'home', 'cbc', 'public_html',
                         'daily_cbc_offline', run)
-    date = gpstime.gps_to_utc(start).date()
-    end = gpstime.gps_to_utc(end).date()
+    date = Time(start, format='gps', scale='utc').datetime
+    end = Time(end, format='gps', scale='utc').datetime
     oneday = datetime.timedelta(days=1)
     filename = '%s-INSPIRAL_%s.cache' % (ifo, filetag)
     out = list()
@@ -383,9 +394,10 @@ def find_daily_cbc_files(channel, start, end, run='bns_gds',
         try:
             with open(cachefile, 'r') as f:
                 for line in f:
-                    e = CacheEntry(line)
-                    if e.segment.intersects(span):
-                        append(e)
+                    _, _, fstart, fdur, url = line.strip().split()
+                    fseg = Segment(float(fstart), float(fstart) + float(fdur))
+                    if fseg.intersects(span):
+                        append(_as_url(url))
         except IOError:
             pass
         date += oneday
@@ -419,7 +431,7 @@ def find_omega_online_files(channel, start, end, filetag='DOWNSELECT',
 
     Returns
     -------
-    files : `list` of :class:`lal.utils.CacheEntry`
+    files : `list` of `str`
         a list of file URLs
     """
 

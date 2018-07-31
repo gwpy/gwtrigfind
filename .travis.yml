@@ -16,7 +16,11 @@ before_install:
   - pip install --quiet --upgrade pip setuptools
 
 install:
-  - pip install --quiet coveralls "pytest>=2.8" unittest2 mock lalsuite
+  - |
+    pip install --quiet \
+        coveralls \
+        "pytest>=2.8" \
+        "mock ; python_version < '3'"
   - pip install -r requirements.txt
   - pip install --editable .
 

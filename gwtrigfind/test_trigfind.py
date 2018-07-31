@@ -24,8 +24,10 @@ import os.path
 
 try:  # python >= 3
     from unittest import mock
+    OPEN = 'builtins.open'
 except ImportError:  # python < 3
     import mock
+    OPEN = '__builtin__.open'
 
 import pytest
 
@@ -36,10 +38,12 @@ __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
 
 # -- mock methods -------------------------------------------------------------
 
-def realpath(f):
-    return f
-
-os.path.realpath = realpath  # mock realpath for testing
+def mock_open(*args, **kargs):
+  """See https://stackoverflow.com/a/41656192/1307974
+  """
+  f_open = mock.mock_open(*args, **kargs)
+  f_open.return_value.__iter__ = lambda self : iter(self.readline, '')
+  return f_open
 
 
 def mock_iglob_factory(fileformat):
@@ -63,13 +67,6 @@ def mock_iglob_factory(fileformat):
             t += d
             yield f
     return mock_gps_glob
-
-
-def mock_find_detchar_glob(globstr):
-    if globstr.lower().endswith('_omicron'):
-        return True
-    else:
-        return list(glob.iglob(globstr))
 
 
 # -- tests --------------------------------------------------------------------
@@ -103,8 +100,8 @@ def test_find_trigger_files():
         cache = core.find_trigger_files(
             'L1:GDS-CALIB_STRAIN', 'dmt-omega', 1135641617, 1135728017)
         assert len(cache) == 9
-        assert cache[0].path == (
-            '/gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
+        assert cache[0] == (
+            'file:///gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
             'L1-OMEGA_TRIGGERS_DOWNSELECT-1135640000-10000.xml')
 
 
@@ -114,8 +111,8 @@ def test_find_dmt_omega_files():
         cache = core.find_dmt_omega_files(
             'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017)
         assert len(cache) == 9
-        assert cache[0].path == (
-            '/gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
+        assert cache[0] == (
+            'file:///gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
             'L1-OMEGA_TRIGGERS_DOWNSELECT-1135640000-10000.xml')
         # check wrapper method works
         assert cache == core.find_trigger_files(
@@ -132,8 +129,8 @@ def test_find_kleinewelle_files():
         cache = core.find_kleinewelle_files(
             'L1:TEST-CHANNEL', 1135641617, 1135728017)
         assert len(cache) == 9
-        assert cache[0].path == (
-            '/gds-l1/dmt/triggers/L-KW_TRIGGERS/L-KW_TRIGGERS-11356/'
+        assert cache[0] == (
+            'file:///gds-l1/dmt/triggers/L-KW_TRIGGERS/L-KW_TRIGGERS-11356/'
             'L-KW_TRIGGERS-1135640000-10000.xml')
         # check wrapper method works
         assert cache == core.find_trigger_files(
@@ -145,29 +142,28 @@ def test_find_kleinewelle_files():
         cache = core.find_kleinewelle_files(
             'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017)
         assert len(cache) == 9
-        assert cache[0].path == (
-            '/gds-l1/dmt/triggers/L-KW_HOFT/'
+        assert cache[0] == (
+            'file:///gds-l1/dmt/triggers/L-KW_HOFT/'
             'L-KW_HOFT-11356/L-KW_HOFT-1135640000-10000.xml')
 
 
 def test_find_detchar_files():
     iglob = mock_iglob_factory('L1-GDS_CALIB_STRAIN_OMICRON-{0}-{1}.xml')
-    glob_ = mock_find_detchar_glob
     with mock.patch('glob.iglob', iglob):
-        with mock.patch('glob.glob', glob_):
+        with mock.patch('glob.glob', bool):
             cache = core.find_detchar_files(
                 'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017,
                 etg='omicron')
             assert len(cache) == 9
-            assert cache[0].path == (
-                '/home/detchar/triggers/*/L1/GDS-CALIB_STRAIN_Omicron/'
+            assert cache[0] == (
+                'file:///home/detchar/triggers/*/L1/GDS-CALIB_STRAIN_Omicron/'
                 '11356/L1-GDS_CALIB_STRAIN_OMICRON-1135640000-10000.xml')
             cache2 = core.find_detchar_files(
                 'L1:GDS-CALIB_STRAIN', 1146873617, 1146873617+1,
                 etg='omicron')
-            assert cache2[0].path == (
-                '/home/detchar/triggers/L1/GDS_CALIB_STRAIN_OMICRON/11468/'
-                'L1-GDS_CALIB_STRAIN_OMICRON-1146870000-10000.xml')
+            assert cache2[0] == (
+                'file:///home/detchar/triggers/L1/GDS_CALIB_STRAIN_OMICRON/'
+                '11468/L1-GDS_CALIB_STRAIN_OMICRON-1146870000-10000.xml')
 
             # check wrapper method works
             assert cache == core.find_trigger_files(
@@ -200,10 +196,20 @@ def test_find_pycbc_live_files():
 
 
 def test_find_daily_cbc_files():
-    # can't do much without faking the entire thing
-    cache = core.find_daily_cbc_files('L1:GDS-CALIB_STRAIN', 0, 100)
-    assert cache == core.find_trigger_files(
-        'L1:GDS-CALIB_STRAIN', 'daily-cbc', 0, 100)
+    # mock the reader, and make sure we get the right cache
+    with mock.patch(OPEN, mock_open(read_data="""
+H1 INSPIRAL 0 50 /test/H1-INSPIRAL-0-50.xml.gz
+H1 INSPIRAL 50 50 /test/H1-INSPIRAL-50-50.xml.gz
+H1 INSPIRAL 100 50 /test/H1-INSPIRAL-100-50.xml.gz
+"""[1:])):
+        cache = core.find_daily_cbc_files('L1:GDS-CALIB_STRAIN', 0, 100)
+        assert cache == core.find_trigger_files(
+            'L1:GDS-CALIB_STRAIN', 'daily-cbc', 0, 100)
+    assert len(cache) == 2
+    assert cache[0] == 'file:///test/H1-INSPIRAL-0-50.xml.gz'
+
+    # without mock, check that we just get an empty cache
+    assert not core.find_daily_cbc_files('X1:GDS-CALIB_STRAIN', 0, 100)
 
 
 def test_find_omega_online_files():
@@ -212,8 +218,8 @@ def test_find_omega_online_files():
         cache = core.find_omega_online_files(
             'G1:DER_DATA_H', 1135641617, 1135728017)
         assert len(cache) == 9
-        assert cache[0].path == (
-            '/home/omega/online/G1_DER_DATA_H/segments/11356/*/'
+        assert cache[0] == (
+            'file:///home/omega/online/G1_DER_DATA_H/segments/11356/*/'
             'G1-OMEGA_TRIGGERS_DOWNSELECT-1135640000-10000.txt')
 
         # check wrapper method works
