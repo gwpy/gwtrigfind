@@ -2,6 +2,8 @@
 
 A utility to find GW trigger files produced by event trigger generators and archived on the LIGO Data Grid.
 
+[![PyPI version](https://badge.fury.io/py/gwtrigfind.svg)](http://badge.fury.io/py/gwtrigfind)
+[![Documentation Status](https://readthedocs.org/projects/gwtrigfind/badge/?version=stable)](https://gwtrigfind.readthedocs.io/en/stable/?badge=stable)
 [![Build Status](https://travis-ci.com/gwpy/gwtrigfind.svg?branch=master)](https://travis-ci.org/gwpy/gwtrigfind)
 [![Coverage Status](https://coveralls.io/repos/github/gwpy/gwtrigfind/badge.svg?branch=master)](https://coveralls.io/github/gwpy/gwtrigfind?branch=master)
 
