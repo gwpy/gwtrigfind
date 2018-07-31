@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) Duncan Macleod (2014)
 #
-# This file is part of Trigfind.
+# This file is part of GWTrigFind.
 #
-# Trigfind is free software: you can redistribute it and/or modify
+# GWTrigFind is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# Trigfind is distributed in the hope that it will be useful,
+# GWTrigFind is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Trigfind.  If not, see <http://www.gnu.org/licenses/>.
+# along with GWTrigFind.  If not, see <http://www.gnu.org/licenses/>.
 
 """This module provides a discovery mechanism for LIGO_LW XML trigger
 files written on the LIGO Data Grid according to the conventions in
@@ -77,15 +77,15 @@ def find_trigger_files(channel, etg, start, end, **kwargs):
 
     See Also
     --------
-    trigfind.find_detchar_files
-    trigfind.find_daily_cbc_files
-    trigfind.find_dmt_omega_files
-    trigfind.find_kleinewelle_files
-    trigfind.find_omega_online_files
+    gwtrigfind.find_detchar_files
+    gwtrigfind.find_daily_cbc_files
+    gwtrigfind.find_dmt_omega_files
+    gwtrigfind.find_kleinewelle_files
+    gwtrigfind.find_omega_online_files
 
     Examples
     --------
-    >>> from trigfind import find_trigger_files
+    >>> from gwtrigfind import find_trigger_files
     >>> cache = find_trigger_files('L1:GDS-CALIB_STRAIN', 'Omicron', 1135641617, 1135728017)
     """
     start = int(start)

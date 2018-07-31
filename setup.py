@@ -15,7 +15,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-"""setup for trigfind
+"""Setup for GWTrigFind
 """
 
 import glob
@@ -25,6 +25,7 @@ import sys
 from setuptools import (setup, find_packages)
 import versioneer
 
+PY_VERSION = sys.version_info
 __version__ = versioneer.get_version()
 
 # collect package data
@@ -41,8 +42,8 @@ if {'pytest', 'test'}.intersection(sys.argv):
 
 
 # run setup
-setup(name='trigfind',
-      provides=['trigfind'],
+setup(name='gwtrigfind',
+      provides=['gwtrigfind'],
       version=__version__,
       description='Utility to find files archived by GW event trigger '
                   'generators',
@@ -54,6 +55,12 @@ setup(name='trigfind',
       setup_requires=setup_requires,
       install_requires=install_requires,
       tests_require=tests_require,
+      entry_points={'console_scripts': [
+          'gwtrigfind=gwtrigfind.__main__:main',
+          'gwtrigfind{0.major}=gwtrigfind.__main__:main'.format(PY_VERSION),
+          'gwtrigfind{0.major}.{0.minor}=gwtrigfind.__main__:main'.format(
+              PY_VERSION),
+      ]},
       use_2to3=False,
       classifiers=[
           'Programming Language :: Python',
