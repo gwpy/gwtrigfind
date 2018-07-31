@@ -69,9 +69,6 @@ setup(name='gwtrigfind',
       tests_require=tests_require,
       entry_points={'console_scripts': [
           'gwtrigfind=gwtrigfind.__main__:main',
-          'gwtrigfind{0.major}=gwtrigfind.__main__:main'.format(PY_VERSION),
-          'gwtrigfind{0.major}.{0.minor}=gwtrigfind.__main__:main'.format(
-              PY_VERSION),
       ]},
       classifiers=[
           'Development Status :: 4 - Beta',
