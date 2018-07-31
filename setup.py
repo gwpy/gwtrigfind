@@ -40,17 +40,6 @@ tests_require = ['pytest']
 if {'pytest', 'test'}.intersection(sys.argv):
     setup_requires.append('pytest_runner')
 
-# add sphinx integration
-if {'build_sphinx'}.intersection(sys.argv):
-    setup_requires.extend((
-        'sphinx',
-        'sphinx_rtd_theme',
-        'sphinx_automodapi',
-        'sphinx_tabs',
-        'numpydoc',
-    ))
-    from sphinx.setup_command import BuildDoc
-    cmdclass['build_sphinx'] = BuildDoc
 
 # run setup
 setup(name='gwtrigfind',
