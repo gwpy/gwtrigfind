@@ -195,18 +195,21 @@ def test_find_pycbc_live_files():
             None, 'pycbc-live', 1126259140, 1126269148)
 
 
-@mock.patch(OPEN, mock_open(read_data="""
+def test_find_daily_cbc_files():
+    # mock the reader, and make sure we get the right cache
+    with mock.patch(OPEN, mock_open(read_data="""
 H1 INSPIRAL 0 50 /test/H1-INSPIRAL-0-50.xml.gz
 H1 INSPIRAL 50 50 /test/H1-INSPIRAL-50-50.xml.gz
 H1 INSPIRAL 100 50 /test/H1-INSPIRAL-100-50.xml.gz
-"""[1:]))
-def test_find_daily_cbc_files():
-    # can't do much without faking the entire thing
-    cache = core.find_daily_cbc_files('L1:GDS-CALIB_STRAIN', 0, 100)
+"""[1:])):
+        cache = core.find_daily_cbc_files('L1:GDS-CALIB_STRAIN', 0, 100)
+        assert cache == core.find_trigger_files(
+            'L1:GDS-CALIB_STRAIN', 'daily-cbc', 0, 100)
     assert len(cache) == 2
     assert cache[0] == 'file:///test/H1-INSPIRAL-0-50.xml.gz'
-    assert cache == core.find_trigger_files(
-        'L1:GDS-CALIB_STRAIN', 'daily-cbc', 0, 100)
+
+    # without mock, check that we just get an empty cache
+    assert not core.find_daily_cbc_files('X1:GDS-CALIB_STRAIN', 0, 100)
 
 
 def test_find_omega_online_files():
