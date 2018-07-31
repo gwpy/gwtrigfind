@@ -24,8 +24,10 @@ import os.path
 
 try:  # python >= 3
     from unittest import mock
+    OPEN = 'builtins.open'
 except ImportError:  # python < 3
     import mock
+    OPEN = '__builtin__.open'
 
 import pytest
 
@@ -35,6 +37,13 @@ __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
 
 
 # -- mock methods -------------------------------------------------------------
+
+def mock_open(*args, **kargs):
+  """See https://stackoverflow.com/a/41656192/1307974
+  """
+  f_open = mock.mock_open(*args, **kargs)
+  f_open.return_value.__iter__ = lambda self : iter(self.readline, '')
+  return f_open
 
 
 def mock_iglob_factory(fileformat):
@@ -186,9 +195,16 @@ def test_find_pycbc_live_files():
             None, 'pycbc-live', 1126259140, 1126269148)
 
 
+@mock.patch(OPEN, mock_open(read_data="""
+H1 INSPIRAL 0 50 /test/H1-INSPIRAL-0-50.xml.gz
+H1 INSPIRAL 50 50 /test/H1-INSPIRAL-50-50.xml.gz
+H1 INSPIRAL 100 50 /test/H1-INSPIRAL-100-50.xml.gz
+"""[1:]))
 def test_find_daily_cbc_files():
     # can't do much without faking the entire thing
     cache = core.find_daily_cbc_files('L1:GDS-CALIB_STRAIN', 0, 100)
+    assert len(cache) == 2
+    assert cache[0] == 'file:///test/H1-INSPIRAL-0-50.xml.gz'
     assert cache == core.find_trigger_files(
         'L1:GDS-CALIB_STRAIN', 'daily-cbc', 0, 100)
 
