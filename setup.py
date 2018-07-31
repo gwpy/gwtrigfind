@@ -15,7 +15,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-"""Setup for GWTrigFind
+"""Utility to find files archived by GW event trigger generators
 """
 
 import glob
@@ -52,12 +52,17 @@ if {'build_sphinx'}.intersection(sys.argv):
     from sphinx.setup_command import BuildDoc
     cmdclass['build_sphinx'] = BuildDoc
 
+# get long description from README
+with open('README.md', 'rb') as f:
+    longdesc = f.read().decode().strip()
+
 # run setup
 setup(name='gwtrigfind',
       provides=['gwtrigfind'],
       version=__version__,
-      description='Utility to find files archived by GW event trigger '
-                  'generators',
+      description=__doc__.strip(),
+      long_description=longdesc,
+      long_description_content_type='text/markdown',
       author='Duncan Macleod',
       author_email='duncan.macleod@ligo.org',
       cmdclass=cmdclass,
