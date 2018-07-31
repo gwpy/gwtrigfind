@@ -1,31 +1,78 @@
-.. gwtrigfind documentation master file, created by
-   sphinx-quickstart on Fri May 20 16:50:21 2016.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+##########
+GWTrigFind
+##########
 
-.. .. currentmodule:: gwtrigfind
+============
+Installation
+============
 
-GWTrigFind documentation
-========================
+.. tabs::
 
-``gwtrigfind`` is a utility module for discovery of gravitational-wave event trigger files produced and stored on the LIGO Data Grid.
-Each 'event trigger' represents a transient signal in a data channel, possibly indicative of an astrophysical gravitational-wave signal, but also possibly an instrumental or environmental noise glitch.
+   .. tab:: Pip
 
-Installing GWTrigFind
----------------------
+      .. code-block:: bash
 
-GWTrigFind can be installed via pip:
+          $ python -m pip install gwtrigfind
 
-.. code-block:: bash
+      Supported python versions: 2.7, 3.4+.
 
-   pip install git+https://github.com/gwpy/gwtrigfind.git
+   .. tab:: Conda
 
-If you prefer to install tagged release, please go to https://github.com/gwpy/gwtrigfind/releases/latest/ and install from the linked `tar.gz` file.
+      .. code-block:: bash
 
-`gwtrigfind` on the command-line
-------------------------------
+          $ conda install -c conda-forge gwtrigfind
 
-The ``gwtrigfind`` package includes a command-line executable with the same name, which takes in a channel name, ETG name, GPS start time, and GPS stop time, and will display the locations of known files, for example to find all Omicron files for ``L1:GDS-CALIB_STRAIN`` for the day of January 1 2016 (UTC):
+      Supported python versions: 2.7, 3.5+.
+
+   .. tab:: Debian Linux
+
+      .. code-block:: bash
+
+          $ apt-get install python3-gwtrigfind
+
+      Supported python versions: 2.7, 3.4 (Jessie), 3.5 (Stretch), 3.6 (Buster),
+      `click here for instructions on how to add the required debian repositories
+      <https://wiki.ligo.org/DASWG/SoftwareOnDebian>`__.
+
+   .. tab:: Scientific Linux
+
+      .. code-block:: bash
+
+          $ yum install python2-gwtrigfind
+
+      Supported python versions: 2.7, `click here for instructions on how to add
+      the required yum repositories
+      <https://wiki.ligo.org/DASWG/ScientificLinux>`__.
+
+   .. tab:: Macports
+
+      .. code-block:: bash
+
+          $ port install py37-gwtrigfind
+
+      Supported python versions: 2.7, 3.6+.
+
+================
+Package overview
+================
+
+.. automodapi:: gwtrigfind
+   :no-inheritance-diagram:
+   :no-heading:
+   :skip: urlparse
+
+========
+See Also
+========
+
+===========================
+Running on the command line
+===========================
+
+The `gwtrigfind` package includes a command-line executable with the same name,
+which takes in a channel name, ETG name, GPS start time, and GPS stop time,
+and will display the locations of known files, for example to find all
+Omicron files for L1:GDS-CALIB_STRAIN for the day of January 1 2016 (UTC):
 
 .. code-block:: bash
 
@@ -33,37 +80,14 @@ The ``gwtrigfind`` package includes a command-line executable with the same name
 
 For a full listing of all arguments and options, run:
 
-
 .. code-block:: bash
 
    $ gwtrigfind --help
 
-`~gwtrigfind.find_trigger_files`
------------------------------
+.. note::
 
-The ``gwtrigfind`` module provides a convience function to find files for any Event Trigger Generator:
+   The command-line interface can also be accessed via
 
-.. autosummary::
-   :toctree: api/
+   .. code-block:: bash
 
-   gwtrigfind.find_trigger_files
-
-::
-
-   >>> from gwtrigfind import find_trigger_files
-   >>> files = find_trigger_files('L1:GDS-CALIB_STRAIN', 'omicron', 1135641617, 1135728017)
-
-The above method passes information along to one of the following that actually finds the files for a given Event Trigger Generator:
-
-.. autosummary::
-   :toctree: api/
-
-   gwtrigfind.find_detchar_files
-   gwtrigfind.find_dmt_files
-   gwtrigfind.find_daily_cbc_files
-   gwtrigfind.find_omega_online_files
-
-Contributing to ``gwtrigfind``
-----------------------------
-
-All contributions for the ``gwtrigfind`` module are welcomed, please post bug reports, feature requests, and pull requests on the GitHub web interace at https://github.com/gwpy/gwtrigfind/.
+      $ python -m gwtrigfind --help

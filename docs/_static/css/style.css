@@ -1,0 +1,29 @@
+
+.icon {
+		font-size: 24px !important;
+}
+
+pre {
+		font-size: 14px !important;
+}
+
+div[class^='highlight'] {
+		background-color: #272822;
+}
+
+code,
+.rst-content code {
+		border: none;
+		font-size: inherit;
+		padding: 0px;
+		background-color: #f9f2f4;
+}
+
+.rst-content code.xref {
+		background: none;
+		color: #e74C3c;
+}
+
+.gp {
+		color: #999;
+}
