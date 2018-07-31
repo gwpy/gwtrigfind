@@ -22,17 +22,18 @@
 from __future__ import print_function
 
 import argparse
+import os.path
 import sys
-from operator import attrgetter
 
-try:  # python >= 3
-    from functools import reduce
-except ImportError:  # python < 2 reduce is built-in
-    pass
+try:
+    from urllib.parse import urlparse
+except ImportError:  # python < 3
+    from urlparse import urlparse
 
 from ligo.segments import (segment as Segment, segmentlist as SegmentList)
 
 import gwtrigfind
+from .core import _file_segment as file_segment
 
 __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
 __version__ = gwtrigfind.__version__
@@ -105,7 +106,7 @@ for seg in segs:
     cache.extend(gwtrigfind.find_trigger_files(
         args.channel, args.etg, start, end, **kwargs))
 
-known = SegmentList(e.segment for e in cache) & segs
+known = SegmentList(map(file_segment, cache)) & segs
 if gaps:
     gaps = segs - known
 if gaps:
@@ -116,11 +117,14 @@ if gaps:
 # -- print files --------------------------------------------------------------
 
 if args.lal_cache:
-    fmt = str
+    def fmt(path):
+        obs, tag, start, duration = os.path.basename(path).split('-')
+        return ' '.join((obs, tag, start, duration.split('.')[0], path))
 elif args.names_only:
-    fmt = attrgetter('path')
+    def fmt(path):
+        return urlparse(path).path
 else:
-    fmt = attrgetter('url')
+    fmt = str
 for e in cache:
     print(fmt(e))
 

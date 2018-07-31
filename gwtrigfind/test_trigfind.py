@@ -103,8 +103,8 @@ def test_find_trigger_files():
         cache = core.find_trigger_files(
             'L1:GDS-CALIB_STRAIN', 'dmt-omega', 1135641617, 1135728017)
         assert len(cache) == 9
-        assert cache[0].path == (
-            '/gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
+        assert cache[0] == (
+            'file:///gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
             'L1-OMEGA_TRIGGERS_DOWNSELECT-1135640000-10000.xml')
 
 
@@ -114,8 +114,8 @@ def test_find_dmt_omega_files():
         cache = core.find_dmt_omega_files(
             'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017)
         assert len(cache) == 9
-        assert cache[0].path == (
-            '/gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
+        assert cache[0] == (
+            'file:///gds-l1/dmt/triggers/L-HOFT_Omega/11356/'
             'L1-OMEGA_TRIGGERS_DOWNSELECT-1135640000-10000.xml')
         # check wrapper method works
         assert cache == core.find_trigger_files(
@@ -132,8 +132,8 @@ def test_find_kleinewelle_files():
         cache = core.find_kleinewelle_files(
             'L1:TEST-CHANNEL', 1135641617, 1135728017)
         assert len(cache) == 9
-        assert cache[0].path == (
-            '/gds-l1/dmt/triggers/L-KW_TRIGGERS/L-KW_TRIGGERS-11356/'
+        assert cache[0] == (
+            'file:///gds-l1/dmt/triggers/L-KW_TRIGGERS/L-KW_TRIGGERS-11356/'
             'L-KW_TRIGGERS-1135640000-10000.xml')
         # check wrapper method works
         assert cache == core.find_trigger_files(
@@ -145,8 +145,8 @@ def test_find_kleinewelle_files():
         cache = core.find_kleinewelle_files(
             'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017)
         assert len(cache) == 9
-        assert cache[0].path == (
-            '/gds-l1/dmt/triggers/L-KW_HOFT/'
+        assert cache[0] == (
+            'file:///gds-l1/dmt/triggers/L-KW_HOFT/'
             'L-KW_HOFT-11356/L-KW_HOFT-1135640000-10000.xml')
 
 
@@ -159,15 +159,15 @@ def test_find_detchar_files():
                 'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017,
                 etg='omicron')
             assert len(cache) == 9
-            assert cache[0].path == (
-                '/home/detchar/triggers/*/L1/GDS-CALIB_STRAIN_Omicron/'
+            assert cache[0] == (
+                'file:///home/detchar/triggers/*/L1/GDS-CALIB_STRAIN_Omicron/'
                 '11356/L1-GDS_CALIB_STRAIN_OMICRON-1135640000-10000.xml')
             cache2 = core.find_detchar_files(
                 'L1:GDS-CALIB_STRAIN', 1146873617, 1146873617+1,
                 etg='omicron')
-            assert cache2[0].path == (
-                '/home/detchar/triggers/L1/GDS_CALIB_STRAIN_OMICRON/11468/'
-                'L1-GDS_CALIB_STRAIN_OMICRON-1146870000-10000.xml')
+            assert cache2[0] == (
+                'file:///home/detchar/triggers/L1/GDS_CALIB_STRAIN_OMICRON/'
+                '11468/L1-GDS_CALIB_STRAIN_OMICRON-1146870000-10000.xml')
 
             # check wrapper method works
             assert cache == core.find_trigger_files(
@@ -212,8 +212,8 @@ def test_find_omega_online_files():
         cache = core.find_omega_online_files(
             'G1:DER_DATA_H', 1135641617, 1135728017)
         assert len(cache) == 9
-        assert cache[0].path == (
-            '/home/omega/online/G1_DER_DATA_H/segments/11356/*/'
+        assert cache[0] == (
+            'file:///home/omega/online/G1_DER_DATA_H/segments/11356/*/'
             'G1-OMEGA_TRIGGERS_DOWNSELECT-1135640000-10000.txt')
 
         # check wrapper method works
