@@ -36,11 +36,6 @@ __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
 
 # -- mock methods -------------------------------------------------------------
 
-def realpath(f):
-    return f
-
-os.path.realpath = realpath  # mock realpath for testing
-
 
 def mock_iglob_factory(fileformat):
     def mock_gps_glob(globstr):
@@ -63,13 +58,6 @@ def mock_iglob_factory(fileformat):
             t += d
             yield f
     return mock_gps_glob
-
-
-def mock_find_detchar_glob(globstr):
-    if globstr.lower().endswith('_omicron'):
-        return True
-    else:
-        return list(glob.iglob(globstr))
 
 
 # -- tests --------------------------------------------------------------------
@@ -152,9 +140,8 @@ def test_find_kleinewelle_files():
 
 def test_find_detchar_files():
     iglob = mock_iglob_factory('L1-GDS_CALIB_STRAIN_OMICRON-{0}-{1}.xml')
-    glob_ = mock_find_detchar_glob
     with mock.patch('glob.iglob', iglob):
-        with mock.patch('glob.glob', glob_):
+        with mock.patch('glob.glob', bool):
             cache = core.find_detchar_files(
                 'L1:GDS-CALIB_STRAIN', 1135641617, 1135728017,
                 etg='omicron')
