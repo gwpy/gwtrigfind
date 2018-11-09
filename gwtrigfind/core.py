@@ -331,7 +331,15 @@ def find_pycbc_live_files(channel, start, end, base=DEFAULT_PYCBC_LIVE_BASE):
     cache = list()
     append = cache.append
     while date <= date_end:
-        date_fol = date.strftime('%Y_%m_%d').replace('_0', '_')
+        date_fol = date.strftime('%Y_%m_%d')
+
+        # support old convention (no leading zeros in month/day)
+        if '_0' in date_fol and (
+            not os.path.isdir(os.path.join(base, date_fol)) and
+            os.path.isdir(os.path.join(base, date_fol.replace('_0', '_')))
+        ):
+            date_fol = date_fol.replace('_0', '_')
+
         full_path = os.path.join(base, date_fol, '*.hdf')
         files = glob.glob(full_path)
 
