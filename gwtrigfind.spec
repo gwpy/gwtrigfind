@@ -1,5 +1,5 @@
 %define name    gwtrigfind
-%define version 0.6.0
+%define version 0.8.0
 %define release 1
 
 Name:      %{name}
@@ -62,5 +62,8 @@ rm -rf $RPM_BUILD_ROOT
 # -- changelog
 
 %changelog
+* Mon Mar 04 2019 Duncan Macleod <duncan.macleod@ligo.org> - 0.8.0-1
+- Updated pycbc.live conventions [https://github.com/gwpy/gwtrigfind/pull/27]
+
 * Mon Jul 30 2018 Duncan Macleod <duncan.macleod@ligo.org>
 - 0.6.0 first RPM build
