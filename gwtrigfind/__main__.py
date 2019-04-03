@@ -92,15 +92,6 @@ for key, arg in argmap.items():
     if getattr(args, arg) is not None:
         kwargs[key] = getattr(args, arg)
 
-# and map daily-cbc-specific args
-cbcmap = {
-    'filetag': 'file_tag',
-    'run': 'run_type',
-}
-if gwtrigfind.daily_cbc.match(args.etg):
-    for key, arg in argmap.items():
-        kwargs[key] = getattr(args, arg)
-
 cache = list()
 for seg in segs:
     cache.extend(gwtrigfind.find_trigger_files(

@@ -71,23 +71,6 @@ def mock_iglob_factory(fileformat):
 
 # -- tests --------------------------------------------------------------------
 
-@pytest.mark.parametrize('var, regex', [
-    ('daily-cbc', core.daily_cbc),
-    ('daily_cbc', core.daily_cbc),
-    ('kw', core.kleinewelle),
-    ('kleinewelle', core.kleinewelle),
-    ('KleineWelle', core.kleinewelle),
-    ('dmtomega', core.dmt_omega),
-    ('dmt-omega', core.dmt_omega),
-    ('dmt_omega', core.dmt_omega),
-    ('DMT Omega', core.dmt_omega),
-    ('Omega', core.omega),
-    ('omega_online', core.omega),
-])
-def test_regex(var, regex):
-    assert regex.match(var) is not None
-
-
 def test_format_channel_name():
     assert core._format_channel_name('X1:TEST-CHANNEL_NAME') == (
         'X1-TEST_CHANNEL_NAME')
@@ -193,23 +176,6 @@ def test_find_pycbc_live_files():
         # check wrapper method works
         assert c == core.find_trigger_files(
             None, 'pycbc-live', 1126259140, 1126269148)
-
-
-def test_find_daily_cbc_files():
-    # mock the reader, and make sure we get the right cache
-    with mock.patch(OPEN, mock_open(read_data="""
-H1 INSPIRAL 0 50 /test/H1-INSPIRAL-0-50.xml.gz
-H1 INSPIRAL 50 50 /test/H1-INSPIRAL-50-50.xml.gz
-H1 INSPIRAL 100 50 /test/H1-INSPIRAL-100-50.xml.gz
-"""[1:])):
-        cache = core.find_daily_cbc_files('L1:GDS-CALIB_STRAIN', 0, 100)
-        assert cache == core.find_trigger_files(
-            'L1:GDS-CALIB_STRAIN', 'daily-cbc', 0, 100)
-    assert len(cache) == 2
-    assert cache[0] == 'file:///test/H1-INSPIRAL-0-50.xml.gz'
-
-    # without mock, check that we just get an empty cache
-    assert not core.find_daily_cbc_files('X1:GDS-CALIB_STRAIN', 0, 100)
 
 
 def test_find_omega_online_files():

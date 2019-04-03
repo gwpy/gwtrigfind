@@ -39,12 +39,9 @@ from ligo.segments import segment as Segment
 
 __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
 
-daily_cbc = re.compile('\Adaily[\s_-]cbc\Z')
-pycbc_live = re.compile('\Apycbc[\s_-]live\Z')
-kleinewelle = re.compile('\A(kw|kleinewelle)\Z', re.I)
-dmt_omega = re.compile('\Admt([\s_-])?omega\Z', re.I)
-omega = re.compile('\Aomega([\s_-])?(online)?\Z', re.I)
 channel_delim = re.compile('[:_-]')
+
+ETG_FINDER = {}
 
 OMICRON_O2_EPOCH = 1146873617
 
@@ -94,7 +91,6 @@ def find_trigger_files(channel, etg, start, end, **kwargs):
     See Also
     --------
     gwtrigfind.find_detchar_files
-    gwtrigfind.find_daily_cbc_files
     gwtrigfind.find_dmt_omega_files
     gwtrigfind.find_kleinewelle_files
     gwtrigfind.find_omega_online_files
@@ -108,19 +104,13 @@ def find_trigger_files(channel, etg, start, end, **kwargs):
     end = int(end)
 
     # construct search
-    if daily_cbc.match(etg):
-        finder = find_daily_cbc_files
-    elif pycbc_live.match(etg):
-        finder = find_pycbc_live_files
-    elif omega.match(etg):
-        finder = find_omega_online_files
-    elif kleinewelle.match(etg):
-        finder = find_kleinewelle_files
-    elif dmt_omega.match(etg):
-        finder = find_dmt_omega_files
+    for reg, finder in ETG_FINDER.items():
+        if reg.match(etg):
+            break
     else:
         finder = find_detchar_files
         kwargs['etg'] = etg
+
     return finder(channel, start, end, **kwargs)
 
 
@@ -231,6 +221,9 @@ def find_kleinewelle_files(channel, start, end, base=None, ext='xml'):
     return _find_in_gps_dirs(os.path.join(base, filename), start, end, ngps=5)
 
 
+ETG_FINDER[re.compile('\A(kw|kleinewelle)\Z', re.I)] = find_kleinewelle_files
+
+
 def find_dmt_omega_files(channel, start, end, base=None, ext='xml'):
     """Find DMT-Omega trigger XML files.
 
@@ -276,6 +269,9 @@ def find_dmt_omega_files(channel, start, end, base=None, ext='xml'):
     # loop over GPS directories and find files
     filename = '{}-{}_OmegaC-*-*.{}'.format(ifo, name, ext)
     return _find_in_gps_dirs(os.path.join(base, filename), start, end, ngps=5)
+
+
+ETG_FINDER[re.compile('\Admt([\s_-])?omega\Z', re.I)] = find_dmt_omega_files
 
 
 def _find_in_gps_dirs(globpath, start, end, ngps=5):
@@ -353,64 +349,7 @@ def find_pycbc_live_files(channel, start, end, base=DEFAULT_PYCBC_LIVE_BASE):
     return cache
 
 
-def find_daily_cbc_files(channel, start, end, run='bns_gds',
-                         filetag='30MILLISEC_CLUSTERED', ext='xml.gz'):
-    """Find daily CBC analysis trigger files
-
-    Parameters
-    ----------
-    channel : `str`
-        name of data channel for which to search
-
-    start : `int`
-        GPS start time of search
-
-    end : `int`
-        GPS end time of search
-
-    run : `str`, optional
-        name of daily CBC analysis that generated the files, defaults to
-        ``'bns_gds'``
-
-    filetag : `str`, optional
-        tag describing which kind of clustering was applied, defaults to
-        ``'30MILLISEC_CLUSTERED'``
-
-    ext : `str`, optional
-        file extension, defaults to ``'xml.gz'``
-
-    Returns
-    -------
-    files : `list` of `str`
-        a list of file URLs
-    """
-
-    span = Segment(start, end)
-    ifo = channel.split(':')[0]
-    base = os.path.join(os.path.sep, 'home', 'cbc', 'public_html',
-                        'daily_cbc_offline', run)
-    date = Time(start, format='gps', scale='utc').datetime
-    end = Time(end, format='gps', scale='utc').datetime
-    oneday = datetime.timedelta(days=1)
-    filename = '%s-INSPIRAL_%s.cache' % (ifo, filetag)
-    out = list()
-    append = out.append
-    while date <= end:
-        day = date.strftime('%Y%m%d')
-        month = day[:6]
-        cachefile = os.path.join(base, month, day, 'cache', filename)
-        try:
-            with open(cachefile, 'r') as f:
-                for line in f:
-                    _, _, fstart, fdur, url = line.strip().split()
-                    fseg = Segment(float(fstart), float(fstart) + float(fdur))
-                    if fseg.intersects(span):
-                        append(_as_url(url))
-        except IOError:
-            pass
-        date += oneday
-    # return unique list (preserving order)
-    return type(out)(OrderedDict.fromkeys(out))
+ETG_FINDER[re.compile('\Apycbc[\s_-]live\Z')] = find_pycbc_live_files
 
 
 def find_omega_online_files(channel, start, end, filetag='DOWNSELECT',
@@ -456,3 +395,8 @@ def find_omega_online_files(channel, start, end, filetag='DOWNSELECT',
     trigform = '%s-OMEGA_TRIGGERS_%s-*-*.%s' % (ifo, filetag, ext)
 
     return _find_in_gps_dirs(os.path.join(base, trigform), start, end, ngps=5)
+
+
+ETG_FINDER[
+    re.compile('\Aomega([\s_-])?(online)?\Z', re.I)
+] = find_omega_online_files
