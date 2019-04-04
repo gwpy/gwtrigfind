@@ -403,7 +403,9 @@ ETG_FINDER[
 ] = find_omega_online_files
 
 GSTLAL_IDQ_FEATURES_BASE = os.path.join(
-    os.path.expanduser("~idq"),
+    os.path.sep,
+    "home",
+    "idq",
     "gstlal",
     "online",
     "features",
