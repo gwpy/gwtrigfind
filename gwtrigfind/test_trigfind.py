@@ -196,6 +196,25 @@ def test_find_omega_online_files():
         core.find_omega_online_files('L1:TEST-CHANNEL', 0, 100)
 
 
+def test_find_gstlal_idq_features_files():
+    iglob = mock_iglob_factory("H-GSTLAL_IDQ_FEATURES-{0}-{1}.h5")
+    with mock.patch("glob.iglob", iglob):
+        cache = core.find_gstlal_idq_features_files(
+            "H1:GDS-CALIB_STRAIN", 1135641617, 1135728017)
+        assert len(cache) == 9
+        assert cache[0] == (
+            "file:///home/idq/gstlal/online/features/H-GSTLAL_IDQ_FEATURES/"
+            "H-GSTLAL_IDQ_FEATURES-11356/"
+            "H-GSTLAL_IDQ_FEATURES-1135640000-10000.h5"
+        )
+
+        # check wrapper method works
+        assert cache == core.find_trigger_files(
+            "H1:GDS-CALIB_STRAIN", "gstlal_idq_features",
+            1135641617, 1135728017,
+        )
+
+
 def test_find_trigger_urls():
     # make sure a DeprecationWarning is presented
     with pytest.warns(DeprecationWarning):

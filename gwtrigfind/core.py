@@ -94,6 +94,7 @@ def find_trigger_files(channel, etg, start, end, **kwargs):
     gwtrigfind.find_dmt_omega_files
     gwtrigfind.find_kleinewelle_files
     gwtrigfind.find_omega_online_files
+    gwtrigfind.find_gstlal_idq_features_files
 
     Examples
     --------
@@ -400,3 +401,28 @@ def find_omega_online_files(channel, start, end, filetag='DOWNSELECT',
 ETG_FINDER[
     re.compile('\Aomega([\s_-])?(online)?\Z', re.I)
 ] = find_omega_online_files
+
+GSTLAL_IDQ_FEATURES_BASE = os.path.join(
+    os.path.expanduser("~idq"),
+    "gstlal",
+    "online",
+    "features",
+)
+
+
+def find_gstlal_idq_features_files(channel, start, end,
+                                   base=GSTLAL_IDQ_FEATURES_BASE):
+    ifo = channel[0]
+    stub = "{}-GSTLAL_IDQ_FEATURES".format(ifo)
+    fileglob = os.path.join(
+        base,
+        stub,
+        "{}-{{0}}".format(stub),
+        "{}-*-*.h5".format(stub),
+    )
+    return _find_in_gps_dirs(fileglob, start, end, ngps=5)
+
+
+ETG_FINDER[
+    re.compile("\Agstlal[\s_-]idq[\s_-]features\Z", re.I)
+] = find_gstlal_idq_features_files
