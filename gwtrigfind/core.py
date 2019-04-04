@@ -39,7 +39,7 @@ from ligo.segments import segment as Segment
 
 __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
 
-channel_delim = re.compile('[:_-]')
+channel_delim = re.compile(r'[:_-]')
 
 ETG_FINDER = {}
 
@@ -222,7 +222,7 @@ def find_kleinewelle_files(channel, start, end, base=None, ext='xml'):
     return _find_in_gps_dirs(os.path.join(base, filename), start, end, ngps=5)
 
 
-ETG_FINDER[re.compile('\A(kw|kleinewelle)\Z', re.I)] = find_kleinewelle_files
+ETG_FINDER[re.compile(r'\A(kw|kleinewelle)\Z', re.I)] = find_kleinewelle_files
 
 
 def find_dmt_omega_files(channel, start, end, base=None, ext='xml'):
@@ -272,7 +272,7 @@ def find_dmt_omega_files(channel, start, end, base=None, ext='xml'):
     return _find_in_gps_dirs(os.path.join(base, filename), start, end, ngps=5)
 
 
-ETG_FINDER[re.compile('\Admt([\s_-])?omega\Z', re.I)] = find_dmt_omega_files
+ETG_FINDER[re.compile(r'\Admt([\s_-])?omega\Z', re.I)] = find_dmt_omega_files
 
 
 def _find_in_gps_dirs(globpath, start, end, ngps=5):
@@ -350,7 +350,7 @@ def find_pycbc_live_files(channel, start, end, base=DEFAULT_PYCBC_LIVE_BASE):
     return cache
 
 
-ETG_FINDER[re.compile('\Apycbc[\s_-]live\Z')] = find_pycbc_live_files
+ETG_FINDER[re.compile(r'\Apycbc[\s_-]live\Z')] = find_pycbc_live_files
 
 
 def find_omega_online_files(channel, start, end, filetag='DOWNSELECT',
@@ -399,7 +399,7 @@ def find_omega_online_files(channel, start, end, filetag='DOWNSELECT',
 
 
 ETG_FINDER[
-    re.compile('\Aomega([\s_-])?(online)?\Z', re.I)
+    re.compile(r'\Aomega([\s_-])?(online)?\Z', re.I)
 ] = find_omega_online_files
 
 GSTLAL_IDQ_FEATURES_BASE = os.path.join(
@@ -424,5 +424,5 @@ def find_gstlal_idq_features_files(channel, start, end,
 
 
 ETG_FINDER[
-    re.compile("\Agstlal[\s_-]idq[\s_-]features\Z", re.I)
+    re.compile(r"\Agstlal[\s_-]idq[\s_-]features\Z", re.I)
 ] = find_gstlal_idq_features_files
