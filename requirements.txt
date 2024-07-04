@@ -1,2 +1,0 @@
-astropy
-ligo-segments >= 1.0.0

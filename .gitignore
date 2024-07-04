@@ -12,3 +12,6 @@
 # docs
 /docs/_build
 /docs/api
+
+# version
+/gwtrigfind/_version.py
