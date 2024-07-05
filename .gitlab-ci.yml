@@ -1,0 +1,14 @@
+include:
+  # -- Python -------------------------
+
+  # https://computing.docs.ligo.org/guide/gitlab/components/python/all/
+  - component: $CI_SERVER_FQDN/computing/gitlab/components/python/all@1
+    inputs:
+      install_extra: "test"
+      extra_test_commands:
+        - python -m coverage run --append -m gwtrigfind --help
+
+  # https://computing.docs.ligo.org/guide/gitlab/components/sphinx/build/
+  - component: $CI_SERVER_FQDN/computing/gitlab/components/sphinx/build@1
+    inputs:
+      requirements: ".[docs]"

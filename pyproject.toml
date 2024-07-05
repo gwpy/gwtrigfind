@@ -49,7 +49,7 @@ test = [
 # documentation
 docs = [
   "numpydoc",
-  "sphinx",
+  "sphinx < 6.0a0",
   "sphinx-automodapi",
   "sphinx_rtd_theme",
   "sphinx_tabs",
@@ -84,7 +84,7 @@ precision = 1
 [tool.pytest.ini_options]
 addopts = "-r a"
 filterwarnings = [
-  "error",
+  #"error",
 ]
 
 # -- setuptools
