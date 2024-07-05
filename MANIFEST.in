@@ -2,5 +2,3 @@ include LICENSE README.md MANIFEST.in
 include versioneer.py
 include gwtrigfind/_version.py
 include gwtrigfind.spec
-include debian/*
-include debian/source/*
