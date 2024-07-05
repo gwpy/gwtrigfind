@@ -1,0 +1,103 @@
+[build-system]
+requires = [
+  "setuptools >= 61",
+  "setuptools-scm >= 7",
+  "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gwtrigfind"
+description = "Utility to find files archived by GW event trigger generators"
+readme = "README.md"
+authors = [
+  { name = "Duncan Macleod", email = "duncan.macleod@ligo.org" },
+]
+license = { text = "GPL-3.0-or-later" }
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering",
+]
+
+# requirements
+requires-python = ">=3.8"
+dependencies = [
+  "astropy",
+  "ligo-segments",
+]
+
+# dynamic properties set by tools
+dynamic = [
+  "version",
+]
+
+[project.optional-dependencies]
+# test suite
+test = [
+  "pytest >=3.9.1",
+  "pytest-cov >=2.4.0",
+]
+# documentation
+docs = [
+  "numpydoc",
+  "sphinx",
+  "sphinx-automodapi",
+  "sphinx_rtd_theme",
+  "sphinx_tabs",
+]
+
+[project.urls]
+"Bug Tracker" = "https://git.ligo.org/detchar/tools/gwtrigfind/-/issues"
+"Documentation" = "https://gwtrigfind.readthedocs.io/"
+"Source Code" = "https://git.ligo.org/detchar/tools/gwtrigfind.git"
+
+# -- coverage.py
+
+[tool.coverage.paths]
+source = [
+  "gwtrigfind/",
+  "*/gwtrigfind/",
+]
+
+[tool.coverage.run]
+source = [ "gwtrigfind" ]
+
+[tool.coverage.report]
+omit = [
+  # ignore version file created by setuptools-scm
+  "*/_version.py",
+]
+# print report with one decimal point
+precision = 1
+
+# -- pytest
+
+[tool.pytest.ini_options]
+addopts = "-r a"
+filterwarnings = [
+  "error",
+]
+
+# -- setuptools
+
+[tool.setuptools]
+license-files = [ "LICENSE" ]
+
+[tool.setuptools.packages.find]
+include = [
+  "gwtrigfind*",
+]
+
+# -- setuptools-scm
+
+[tool.setuptools_scm]
+write_to = "gwtrigfind/_version.py"
