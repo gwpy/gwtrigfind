@@ -24,16 +24,6 @@ Installation
 
       Supported python versions: 2.7, 3.5+.
 
-   .. tab:: Scientific Linux
-
-      .. code-block:: bash
-
-          $ yum install python2-gwtrigfind
-
-      Supported python versions: 2.7, `click here for instructions on how to add
-      the required yum repositories
-      <https://wiki.ligo.org/DASWG/ScientificLinux>`__.
-
    .. tab:: Macports
 
       .. code-block:: bash

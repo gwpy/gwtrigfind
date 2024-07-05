@@ -1,4 +1,3 @@
 include LICENSE README.md MANIFEST.in
 include versioneer.py
 include gwtrigfind/_version.py
-include gwtrigfind.spec
