@@ -33,7 +33,7 @@ try:
 except ImportError:  # python < 3
     from urlparse import urlparse
 
-from astropy.time import Time
+from gpstime import gpstime
 
 from ligo.segments import segment as Segment
 
@@ -324,8 +324,8 @@ def find_pycbc_live_files(channel, start, end, base=DEFAULT_PYCBC_LIVE_BASE):
         a list of file URLs
     """
     span = Segment(start, end)
-    date = Time(start, format='gps', scale='utc').datetime
-    date_end = Time(end, format='gps', scale='utc').datetime
+    date = gpstime.fromgps(start)
+    date_end = gpstime.fromgps(end)
     oneday = datetime.timedelta(days=1)
 
     cache = list()
@@ -389,8 +389,8 @@ def find_daily_cbc_files(channel, start, end, run='bns_gds',
     ifo = channel.split(':')[0]
     base = os.path.join(os.path.sep, 'home', 'cbc', 'public_html',
                         'daily_cbc_offline', run)
-    date = Time(start, format='gps', scale='utc').datetime
-    end = Time(end, format='gps', scale='utc').datetime
+    date = gpstime.fromgps(start)
+    end = gpstime.fromgps(end)
     oneday = datetime.timedelta(days=1)
     filename = '%s-INSPIRAL_%s.cache' % (ifo, filetag)
     out = list()
