@@ -132,7 +132,7 @@ def find_trigger_urls(*args, **kwargs):
     return find_trigger_files(*args, **kwargs)
 
 
-def find_detchar_files(channel, start, end, etg='omicron', ext='xml.gz'):
+def find_detchar_files(channel, start, end, etg='omicron', ext='h5'):
     """Find files in the detchar home directory following T1300468
 
     Parameters
@@ -151,7 +151,7 @@ def find_detchar_files(channel, start, end, etg='omicron', ext='xml.gz'):
         ``'omicron'``
 
     ext : `str`, optional
-        file extension, defaults to ``'xml.gz'``
+        file extension, defaults to ``'h5'``
 
     Returns
     -------
