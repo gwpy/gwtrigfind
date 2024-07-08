@@ -39,11 +39,11 @@ from ligo.segments import segment as Segment
 
 __author__ = 'Duncan Macleod <duncan.macleod@ligo.org>'
 
-daily_cbc = re.compile('\Adaily[\s_-]cbc\Z')
-pycbc_live = re.compile('\Apycbc[\s_-]live\Z')
-kleinewelle = re.compile('\A(kw|kleinewelle)\Z', re.I)
-dmt_omega = re.compile('\Admt([\s_-])?omega\Z', re.I)
-omega = re.compile('\Aomega([\s_-])?(online)?\Z', re.I)
+daily_cbc = re.compile(r'\Adaily[\s_-]cbc\Z')
+pycbc_live = re.compile(r'\Apycbc[\s_-]live\Z')
+kleinewelle = re.compile(r'\A(kw|kleinewelle)\Z', re.I)
+dmt_omega = re.compile(r'\Admt([\s_-])?omega\Z', re.I)
+omega = re.compile(r'\Aomega([\s_-])?(online)?\Z', re.I)
 channel_delim = re.compile('[:_-]')
 
 OMICRON_O2_EPOCH = 1146873617

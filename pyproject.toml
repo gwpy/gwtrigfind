@@ -84,7 +84,11 @@ precision = 1
 [tool.pytest.ini_options]
 addopts = "-r a"
 filterwarnings = [
-  #"error",
+  # fail on any warnings
+  "error",
+  # except:
+  # see https://git.ligo.org/cds/software/gpstime/-/merge_requests/15
+  "ignore:.*utcfromtimestamp::gpstime",
 ]
 
 # -- setuptools
