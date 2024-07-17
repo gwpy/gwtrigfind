@@ -47,6 +47,9 @@ omega = re.compile(r'\Aomega([\s_-])?(online)?\Z', re.I)
 channel_delim = re.compile('[:_-]')
 
 OMICRON_O2_EPOCH = 1146873617
+# DMT Omega running on CIT changed at this point
+# Prior to this, DMT Omega was labeled as OMICRON
+DMT_OMEGA_V1_O4_EPOCH = 1392496139
 
 DEFAULT_PYCBC_LIVE_BASE = os.path.join(
     os.path.sep, 'home', 'pycbc.live', 'triggers', 'data')
@@ -259,22 +262,28 @@ def find_dmt_omega_files(channel, start, end, base=None, ext='xml'):
     """
     span = Segment(int(start), int(end))
     ifo, name = _format_channel_name(str(channel)).split('-', 1)
-    hoft = name == 'GDS_CALIB_STRAIN'
+    hoft = name in ['GDS_CALIB_STRAIN', 'Hrec_hoft_16384Hz']
     site = ifo[0].upper()
 
-    # find base path
-    if hoft:
-        tag = '{}-HOFT_Omega'.format(site)
+    if hoft and site == 'V' and end < DMT_OMEGA_V1_O4_EPOCH:
+        tag = os.path.join(f'{ifo.upper()}', f'{name}_OMICRON')
+    elif hoft:
+        tag = f'{site}-HOFT_Omega'
     else:
         raise NotImplementedError(
             "This method doesn't know how to locate "
-            "DMT-Omega files for {}".format(str(channel)))
-    if base is None:
+            f"DMT-Omega files for {str(channel)}")
+    if base is None and site == 'V':
+        base = os.path.join(os.sep, 'home', 'detchar', 'triggers', tag, '{0}')
+    elif base is None:
         base = os.path.join(os.sep, 'gds-{}'.format(ifo.lower()), 'dmt',
                             'triggers', tag, '{0}')
 
     # loop over GPS directories and find files
-    filename = '{}-{}_OmegaC-*-*.{}'.format(ifo, name, ext)
+    if site == 'V' and end < DMT_OMEGA_V1_O4_EPOCH:
+        filename = f'{ifo}-{name}_OMICRON-*-*.{ext}'
+    else:
+        filename = f'{ifo}-{name}_OmegaC-*-*.{ext}'
     return _find_in_gps_dirs(os.path.join(base, filename), start, end, ngps=5)
 
 
