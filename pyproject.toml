@@ -60,6 +60,9 @@ docs = [
 "Documentation" = "https://gwtrigfind.readthedocs.io/"
 "Source Code" = "https://git.ligo.org/detchar/tools/gwtrigfind.git"
 
+[project.scripts]
+gwtrigfind = "gwtrigfind.cli:main"
+
 # -- coverage.py
 
 [tool.coverage.paths]
