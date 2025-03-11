@@ -49,7 +49,7 @@ test = [
 # documentation
 docs = [
   "numpydoc",
-  "sphinx < 6.0a0",
+  "sphinx",
   "sphinx-automodapi",
   "sphinx_rtd_theme",
   "sphinx_tabs",

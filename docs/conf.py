@@ -17,7 +17,7 @@ extensions = [
 
 #templates_path = ['_templates']
 
-source_suffix = '.rst'
+source_suffix = {'.rst': 'restructuredtext'}
 
 master_doc = 'index'
 
@@ -41,8 +41,8 @@ pygments_style = 'monokai'
 
 # Intersphinx directory
 intersphinx_mapping = {
-    'https://docs.python.org/': None,  # python
-    'https://lscsoft.docs.ligo.org/ligo-segments/': None,  # ligo-segments,
+    'python': ('https://docs.python.org/', None),  # python
+    'ligo-segments': ('https://lscsoft.docs.ligo.org/ligo-segments/', None),  # ligo-segments
 }
 
 # The reST default role (used for this markup: `text`) to use for all
@@ -78,7 +78,7 @@ def setup_static_content(app):
 
         # add stylesheets
         for cssf in glob.glob(os.path.join(staticdir, 'css', '*.css')):
-            app.add_stylesheet(cssf[len(staticdir)+1:])
+            app.add_css_file(cssf[len(staticdir)+1:])
 
         # add custom javascript
         for jsf in glob.glob(os.path.join(staticdir, 'js', '*.js')):
