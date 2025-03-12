@@ -195,6 +195,30 @@ def test_find_pycbc_live_files():
             None, 'pycbc-live', 1126259140, 1126269148)
 
 
+def test_find_snax_files():
+    test_glob = [
+        'H1-SNAX_FEATURES-1425848220-20.h5',
+        'H1-SNAX_FEATURES-1425848240-20.h5',
+        'H1-SNAX_FEATURES-1425848260-20.h5',
+        'H1-SNAX_FEATURES-1425848280-20.h5',
+    ]
+
+    with mock.patch('glob.iglob', lambda x: test_glob):
+        c = core.find_snax_files(
+                "H1:CAL-DELTA_EXTERNAL_DQ", 1125848220, 1125848300
+                )
+        assert len(c) == 0
+
+        c = core.find_snax_files(
+                "H1:CAL-DELTA_EXTERNAL_DQ", 1425848220, 1425848300
+                )
+        assert len(c) == 4
+
+        # check wrapper method works
+        assert c == core.find_trigger_files(
+                "H1:CAL-DELTA_EXTERNAL_DQ", 'snax', 1425848220, 1425848300)
+
+
 def test_find_daily_cbc_files():
     # mock the reader, and make sure we get the right cache
     with mock.patch(OPEN, mock_open(read_data="""

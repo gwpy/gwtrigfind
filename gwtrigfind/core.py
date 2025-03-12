@@ -44,6 +44,7 @@ pycbc_live = re.compile(r'\Apycbc[\s_-]live\Z')
 kleinewelle = re.compile(r'\A(kw|kleinewelle)\Z', re.I)
 dmt_omega = re.compile(r'\Admt([\s_-])?omega\Z', re.I)
 omega = re.compile(r'\Aomega([\s_-])?(online)?\Z', re.I)
+snax = re.compile(r'\Asnax\Z', re.I)
 channel_delim = re.compile('[:_-]')
 
 OMICRON_O2_EPOCH = 1146873617
@@ -101,6 +102,7 @@ def find_trigger_files(channel, etg, start, end, **kwargs):
     gwtrigfind.find_dmt_omega_files
     gwtrigfind.find_kleinewelle_files
     gwtrigfind.find_omega_online_files
+    gwtrigfind.find_snax_files
 
     Examples
     --------
@@ -121,6 +123,8 @@ def find_trigger_files(channel, etg, start, end, **kwargs):
         finder = find_kleinewelle_files
     elif dmt_omega.match(etg):
         finder = find_dmt_omega_files
+    elif snax.match(etg):
+        finder = find_snax_files
     else:
         finder = find_detchar_files
         kwargs['etg'] = etg
@@ -465,3 +469,43 @@ def find_omega_online_files(channel, start, end, filetag='DOWNSELECT',
     trigform = '%s-OMEGA_TRIGGERS_%s-*-*.%s' % (ifo, filetag, ext)
 
     return _find_in_gps_dirs(os.path.join(base, trigform), start, end, ngps=5)
+
+
+def find_snax_files(channel, start, end, base=None, ext='h5'):
+    """Find SNAX trigger files
+
+    Parameters
+    ----------
+    channel : `str`
+        name of data channel for which to search
+
+    start : `int`
+        GPS start time of search
+
+    end : `int`
+        GPS end time of search
+
+    base : `str`, optional
+        path of custom base directory, defaults to the LDG standard for
+        the given ``etg``
+
+    ext : `str`, optional
+        file extension, defaults to ``'xml'``
+
+    Returns
+    -------
+    files : `list` of `str`
+        a list of file URLs
+    """
+    ifo, name = _format_channel_name(str(channel)).split('-', 1)
+
+    # find base path
+    tag = f"{ifo}-SNAX_FEATURES"
+    if base is None:
+        base = os.path.join(os.sep, 'home', 'idq', 'snax', 'production',
+                            'online', '*', 'features')
+
+    # loop over GPS directories and find files
+    filename = f"{tag}-*-*.{ext}"
+    return _find_in_gps_dirs(os.path.join(base, '{0}', filename),
+                             start, end, ngps=5)
