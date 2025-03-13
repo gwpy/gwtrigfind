@@ -41,7 +41,7 @@ with an actual release version.
 
 The CI pipeline triggered by the creation of the git tag will automatically
 build and upload a new source distribution and binary wheel to
-<https://pypi.org/projects/gwtrigfind>.
+<https://pypi.org/project/gwtrigfind>.
 
 ## 2. Open an SCCB request
 
